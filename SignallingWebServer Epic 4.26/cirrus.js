@@ -97,6 +97,49 @@ var serverPublicIp;
 // let clientConfig = {peerConnectionOptions: { 'iceServers': [{'urls': ['stun:34.250.222.95:19302']}] }};
 var clientConfig = { type: 'config', peerConnectionOptions: {} };
 
+
+
+var xirsysUSFromEagle = {
+  iceServers: [
+    { urls: ["stun:us-turn3.xirsys.com"] },
+    {
+      username:
+        "CGZc97uKw4Dim_RblekihbWSmRYapK48ctHiqelLpYV8Ybg-4A9CkLEZR4PqNUd2AAAAAGAQoX1lYWdsZTNkc3RyZWFtaW5n",
+      credential: "bccdc2e4-602b-11eb-919b-0242ac140004",
+      urls: [
+        "turn:us-turn3.xirsys.com:80?transport=udp",
+        "turn:us-turn3.xirsys.com:3478?transport=udp",
+        "turn:us-turn3.xirsys.com:80?transport=tcp",
+        "turn:us-turn3.xirsys.com:3478?transport=tcp",
+        "turns:us-turn3.xirsys.com:443?transport=tcp",
+        "turns:us-turn3.xirsys.com:5349?transport=tcp",
+      ],
+    },
+  ],
+};
+
+var xirsysEUFromEagle = {
+  iceServers: [
+    { urls: ["stun:eu-turn1.xirsys.com"] },
+    {
+      username:
+        "ey0gklhdt6vwYeIFndZxCNJs1eZOoQfYbzEIg0dbeGftwiV2DzvVIruoYBWvzPP4AAAAAGAv9hRlYWdsZTNkc3RyZWFtaW5n",
+      credential: "620a5cb8-72d8-11eb-bd12-0242ac140004",
+      urls: [
+        "turn:eu-turn1.xirsys.com:80?transport=udp",
+        "turn:eu-turn1.xirsys.com:3478?transport=udp",
+        "turn:eu-turn1.xirsys.com:80?transport=tcp",
+        "turn:eu-turn1.xirsys.com:3478?transport=tcp",
+        "turns:eu-turn1.xirsys.com:443?transport=tcp",
+        "turns:eu-turn1.xirsys.com:5349?transport=tcp",
+      ],
+    },
+  ],
+};
+
+
+clientConfig.peerConnectionOptions=xirsysUSFromEagle
+
 // Parse public server address from command line
 // --publicIp <public address>
 try {
