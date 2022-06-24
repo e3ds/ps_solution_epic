@@ -4,6 +4,15 @@
 
 var express = require('express');
 var app = express();
+const axios=require('axios');
+const session = require("express-session");
+const rootCas=require('ssl-root-cas').create();
+const shttps=require("https");
+shttps.globalAgent.options.ca = rootCas;
+const agent = new shttps.Agent({ rejectUnauthorized: false });
+const SERVER= require("./common").SERVER;
+const MASTER = require("./common").MASTER;
+
 
 const fs = require('fs');
 const path = require('path');
@@ -13,6 +22,32 @@ const logging = require('./modules/logging.js');
 logging.RegisterConsoleLogger();
 
 // Command line argument --configFile needs to be checked before loading the config, all other command line arguments are dealt with through the config object
+async function validateCookie(req,res,next){
+	let credentials=await axios.get(MASTER+"/api/credential?cUrl="+SERVER+"/play").then((result)=>result.data).catch(err=> console.log(err));
+	console.log(credentials);
+	if (credentials.userName){
+		req.session.loggedIn=true;
+		req.session.userName=credentials.userName;
+	  
+	  
+	  // res.redirect(SERVER+"/freeforall")
+	  
+	}else{
+		req.session.loggedIn=false;
+		req.session.userName=undefined;
+	  	console.log("No cookies");
+	}
+	next();
+  }
+
+app.use(
+	session({
+	  secret: "secret",
+	  resave: true,
+	  saveUninitialized: true,
+	})
+  );
+app.use(validateCookie);
 
 const defaultConfig = {
 	UseFrontend: false,
@@ -26,7 +61,7 @@ const defaultConfig = {
 	MatchmakerAddress: "",
 	MatchmakerPort: "9999",
 	PublicIp: "localhost",
-	HttpPort: 80,
+	HttpPort: 5580,
 	HttpsPort: 443,
 	StreamerPort: 8888
 };
@@ -221,7 +256,7 @@ try {
 }
 
 if(config.EnableWebserver) {
-	app.get('/', isAuthenticated('/login'), function (req, res) {
+	app.get('/', validateCookie, async function (req, res) {
 		homepageFile = (typeof config.HomepageFile != 'undefined' && config.HomepageFile != '') ? config.HomepageFile.toString() : defaultConfig.HomepageFile;
 		homepageFilePath = path.join(__dirname, homepageFile)
 
@@ -231,7 +266,14 @@ if(config.EnableWebserver) {
 				res.status(404).send('Unable to locate file ' + homepageFile);
 			}
 			else {
-				res.sendFile(homepageFilePath);
+				console.log(req.session.loggedIn);
+				if (req.session.loggedIn){
+					res.sendFile(homepageFilePath);
+				}else{
+					res.redirect(MASTER+"/signin?continueUrl="+SERVER+"/");
+				}
+				
+				
 			}
 		});
 	});
