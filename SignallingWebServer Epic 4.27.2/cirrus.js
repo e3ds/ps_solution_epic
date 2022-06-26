@@ -12,6 +12,7 @@ shttps.globalAgent.options.ca = rootCas;
 const agent = new shttps.Agent({ rejectUnauthorized: false });
 const SERVER= require("./common").SERVER;
 const MASTER = require("./common").MASTER;
+const cookieParser=require('cookie-parser');
 
 
 const fs = require('fs');
@@ -23,23 +24,33 @@ logging.RegisterConsoleLogger();
 
 // Command line argument --configFile needs to be checked before loading the config, all other command line arguments are dealt with through the config object
 async function validateCookie(req,res,next){
-	let credentials=await axios.get(MASTER+"/api/credential?cUrl="+SERVER+"/play").then((result)=>result.data).catch(err=> console.log(err));
-	console.log(credentials);
-	if (credentials.userName){
+	var {cookies}=req;
+	let credentials=undefined;
+	if(cookies.session){
+		credentials=await axios.get(MASTER+"/api/credential?cUrl="+SERVER,{ headers:{Cookie:"session="+cookies.session+";"},  withCredentials: true }).then((result)=>result.data).catch(err=> console.log(err));
+		console.log(credentials);
+	}
+	if (credentials){
 		req.session.loggedIn=true;
 		req.session.userName=credentials.userName;
-	  
+		console.log(credentials.userName);
 	  
 	  // res.redirect(SERVER+"/freeforall")
 	  
 	}else{
 		req.session.loggedIn=false;
 		req.session.userName=undefined;
-	  	console.log("No cookies");
+	  	console.log("Unverified");
 	}
 	next();
   }
-
+  app.use(function(req, res, next) {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Credentials', true);
+	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+	next();
+  });
+app.use(cookieParser());
 app.use(
 	session({
 	  secret: "secret",
@@ -270,7 +281,8 @@ if(config.EnableWebserver) {
 				if (req.session.loggedIn){
 					res.sendFile(homepageFilePath);
 				}else{
-					res.redirect(MASTER+"/signin?continueUrl="+SERVER+"/");
+					
+					res.redirect(MASTER+"/signin?continueUrl="+SERVER);
 				}
 				
 				
