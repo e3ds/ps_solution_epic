@@ -10,7 +10,7 @@
 	"MatchmakerAddress": "",
 	"MatchmakerPort": "9999",
 	"PublicIp": "localhost",
-	"HttpPort": 80,
+	"HttpPort": 5580,
 	"HttpsPort": 443,
-	"StreamerPort": 8888
+	"StreamerPort": 9999
 }
