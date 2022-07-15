@@ -247,6 +247,12 @@ if(config.UseAuthentication){
 	);
 }
 
+app.get('/auth',(req,res)=>{
+	let token=req.query.token;
+	let options = { maxAge: 86400*5000, httpOnly: true };
+	res.cookie("session",token,options);
+});
+
 if(config.EnableWebserver) {
 	//Setup folders
 	app.use(express.static(path.join(__dirname, '/www')))
@@ -279,6 +285,7 @@ if(config.EnableWebserver) {
 			else {
 				console.log(req.session.loggedIn);
 				if (req.session.loggedIn){
+					console.log("Username is "+req.session.userName);
 					res.sendFile(homepageFilePath);
 				}else{
 					
