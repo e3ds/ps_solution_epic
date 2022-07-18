@@ -26,8 +26,8 @@ logging.RegisterConsoleLogger();
 async function validateCookie(req,res,next){
 	var {cookies}=req;
 	let credentials=undefined;
-	if(cookies.session){
-		credentials=await axios.get(MASTER+"/api/credential?cUrl="+SERVER,{ headers:{Cookie:"session="+cookies.session+";"},  withCredentials: true }).then((result)=>result.data).catch(err=> console.log(err));
+	if(cookies.__session){
+		credentials=await axios.get(MASTER+"/api/credential?cUrl="+SERVER+"&token="+cookies.__session,{ headers:{Cookie:"__session="+cookies.__session+";"},  withCredentials: true }).then((result)=>result.data).catch(err=> console.log(err));
 		console.log(credentials);
 	}
 	if (credentials){
