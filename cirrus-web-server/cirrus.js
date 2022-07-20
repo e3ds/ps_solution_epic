@@ -27,7 +27,11 @@ async function validateCookie(req,res,next){
 	var {cookies}=req;
 	let credentials=undefined;
 	if(cookies.__session){
-		res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
+		if (req.session.loggedIn){
+			res.redirect(SERVER);
+		}else {
+			res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
+		}
 		// credentials=await axios.get(MASTER+"/api/credential?cUrl="+SERVER+"&token="+cookies.__session,{ headers:{Cookie:"__session="+cookies.__session+";"},  withCredentials: true }).then((result)=>result.data).catch(err=> console.log(err));
 		// console.log(credentials);
 	}else{
@@ -61,7 +65,7 @@ app.use(
 	  saveUninitialized: true,
 	})
   );
-app.use(validateCookie);
+// app.use(validateCookie);
 
 const defaultConfig = {
 	UseFrontend: false,
@@ -265,10 +269,11 @@ app.get('/valid',(req,res)=>{
 app.get('/auth',(req,res)=>{
 	let token=req.query.token;
 	let curl=req.query.curl;
+	console.log(token);
 	let options = { maxAge: 86400*5000, httpOnly: true };
 	res.cookie("__session",token,options);
 	req.session.loggedIn=true;
-	res.redirect(302,curl);
+	res.redirect(curl);
 });
 
 if(config.EnableWebserver) {
@@ -301,14 +306,21 @@ if(config.EnableWebserver) {
 				res.status(404).send('Unable to locate file ' + homepageFile);
 			}
 			else {
-				console.log(req.session.loggedIn);
-				if (req.session.loggedIn){
-					console.log("Username is "+req.session.userName);
+				
+				var {cookies}=req;
+				let credentials=undefined;
+				console.log(cookies.__session);
+				if(cookies.__session){
+					// if (req.session.loggedIn){
+					// 	res.sendFile(homepageFilePath);
+					// }else {
+					// 	res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
+					// }
 					res.sendFile(homepageFilePath);
 				}else{
-					
-					res.redirect(MASTER+"/signin?continueUrl="+SERVER);
+					res.redirect(MASTER+'/sign?curl='+SERVER);
 				}
+				
 				
 				
 			}
