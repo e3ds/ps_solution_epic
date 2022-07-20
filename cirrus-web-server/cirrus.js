@@ -45,7 +45,7 @@ async function validateCookie(req,res,next){
 	// 	req.session.userName=undefined;
 	//   	console.log("Unverified");
 	// }
-	next();
+	
   }
   app.use(function(req, res, next) {
 	res.header('Access-Control-Allow-Origin', '*');
@@ -250,13 +250,25 @@ if(config.UseAuthentication){
 	);
 }
 
+app.get('/valid',(req,res)=>{
+	var {cookies}=req;
+	let credentials=undefined;
+	if(cookies.__session){
+		res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
+		// credentials=await axios.get(MASTER+"/api/credential?cUrl="+SERVER+"&token="+cookies.__session,{ headers:{Cookie:"__session="+cookies.__session+";"},  withCredentials: true }).then((result)=>result.data).catch(err=> console.log(err));
+		// console.log(credentials);
+	}else{
+		res.redirect(MASTER+'/sign?curl='+SERVER);
+	}
+})
+
 app.get('/auth',(req,res)=>{
 	let token=req.query.token;
 	let curl=req.query.curl;
 	let options = { maxAge: 86400*5000, httpOnly: true };
-	res.cookie("session",token,options);
+	res.cookie("__session",token,options);
 	req.session.loggedIn=true;
-	res.redirect(curl);
+	res.redirect(302,curl);
 });
 
 if(config.EnableWebserver) {
@@ -279,7 +291,7 @@ try {
 }
 
 if(config.EnableWebserver) {
-	app.get('/', validateCookie, async function (req, res) {
+	app.get('/',  function (req, res) {
 		homepageFile = (typeof config.HomepageFile != 'undefined' && config.HomepageFile != '') ? config.HomepageFile.toString() : defaultConfig.HomepageFile;
 		homepageFilePath = path.join(__dirname, homepageFile)
 
