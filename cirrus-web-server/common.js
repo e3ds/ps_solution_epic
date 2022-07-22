@@ -1,3 +1,3 @@
-const SERVER = "http://localhost:5580";
-const MASTER = "https://127.0.0.1:3003";
+const SERVER = "http://cirrus1.eagle3dstreaming.com";
+const MASTER = "https://login1.eagle3dstreaming.com";
 module.exports={SERVER,MASTER};
