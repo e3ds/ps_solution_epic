@@ -1,3 +1,3 @@
 const SERVER = "http://localhost:5580";
-const MASTER = "http://127.0.0.1:3007";
+const MASTER = "https://127.0.0.1:3003";
 module.exports={SERVER,MASTER};

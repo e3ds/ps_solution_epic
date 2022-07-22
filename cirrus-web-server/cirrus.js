@@ -254,17 +254,7 @@ if(config.UseAuthentication){
 	);
 }
 
-app.get('/valid',(req,res)=>{
-	var {cookies}=req;
-	let credentials=undefined;
-	if(cookies.__session){
-		res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
-		// credentials=await axios.get(MASTER+"/api/credential?cUrl="+SERVER+"&token="+cookies.__session,{ headers:{Cookie:"__session="+cookies.__session+";"},  withCredentials: true }).then((result)=>result.data).catch(err=> console.log(err));
-		// console.log(credentials);
-	}else{
-		res.redirect(MASTER+'/sign?curl='+SERVER);
-	}
-})
+
 
 app.get('/auth',(req,res)=>{
 	let token=req.query.token;
