@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 //-- Server side logic. Serves pixel streaming WebRTC-based page, proxies data back to Streamer --//
-
+process.env['NODE_TLS_REJECT_UNAUTHORIZED']=0;
 var express = require('express');
 var app = express();
 const axios=require('axios');
@@ -23,34 +23,7 @@ const logging = require('./modules/logging.js');
 logging.RegisterConsoleLogger();
 
 // Command line argument --configFile needs to be checked before loading the config, all other command line arguments are dealt with through the config object
-async function validateCookie(req,res,next){
-	var {cookies}=req;
-	let credentials=undefined;
-	if(cookies.__session){
-		if (req.session.loggedIn){
-			res.redirect(SERVER);
-		}else {
-			res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
-		}
-		// credentials=await axios.get(MASTER+"/api/credential?cUrl="+SERVER+"&token="+cookies.__session,{ headers:{Cookie:"__session="+cookies.__session+";"},  withCredentials: true }).then((result)=>result.data).catch(err=> console.log(err));
-		// console.log(credentials);
-	}else{
-		res.redirect(MASTER+'/sign?curl='+SERVER);
-	}
-	// if (credentials){
-	// 	req.session.loggedIn=true;
-	// 	req.session.userName=credentials.userName;
-	// 	console.log(credentials.userName);
-	  
-	//   // res.redirect(SERVER+"/freeforall")
-	  
-	// }else{
-	// 	req.session.loggedIn=false;
-	// 	req.session.userName=undefined;
-	//   	console.log("Unverified");
-	// }
-	
-  }
+
   app.use(function(req, res, next) {
 	res.header('Access-Control-Allow-Origin', '*');
 	res.header('Access-Control-Allow-Credentials', true);
@@ -254,8 +227,34 @@ if(config.UseAuthentication){
 	);
 }
 
+async function validateCookie(req,res,next){
+	var {cookies}=req;
+	if(cookies.__session){
+		let flag=await axios.get(MASTER+"/log?token="+cookies.__session).then((result)=>result.data).catch(err=>console.log(err));
+		if (flag=="Signed"){
+			if(req.session.loggedIn){
+				next();
+			}else{
+				res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
+			}
+		}else{
+			res.redirect('/clear');
+		}
+		
+	}else{
+		console.log("No cookie");
+		res.redirect(MASTER+'/sign?curl='+SERVER);
+	}
 
+  }
 
+app.get('/clear',(req,res)=>{
+	
+	if(req.cookies.__session){
+		res.clearCookie("__session");
+	}
+	res.redirect(MASTER+'/sign?curl='+SERVER);
+});
 app.get('/auth',(req,res)=>{
 	let token=req.query.token;
 	let curl=req.query.curl;
@@ -286,7 +285,7 @@ try {
 }
 
 if(config.EnableWebserver) {
-	app.get('/',  function (req, res) {
+	app.get('/', validateCookie,  function (req, res) {
 		homepageFile = (typeof config.HomepageFile != 'undefined' && config.HomepageFile != '') ? config.HomepageFile.toString() : defaultConfig.HomepageFile;
 		homepageFilePath = path.join(__dirname, homepageFile)
 
@@ -296,23 +295,7 @@ if(config.EnableWebserver) {
 				res.status(404).send('Unable to locate file ' + homepageFile);
 			}
 			else {
-				
-				var {cookies}=req;
-				let credentials=undefined;
-				console.log(cookies.__session);
-				if(cookies.__session){
-					// if (req.session.loggedIn){
-					// 	res.sendFile(homepageFilePath);
-					// }else {
-					// 	res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
-					// }
-					res.sendFile(homepageFilePath);
-				}else{
-					res.redirect(MASTER+'/sign?curl='+SERVER);
-				}
-				
-				
-				
+				res.sendFile(homepageFilePath);
 			}
 		});
 	});
