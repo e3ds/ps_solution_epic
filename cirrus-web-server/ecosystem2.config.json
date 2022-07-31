@@ -1,0 +1,16 @@
+{
+    "apps": [
+      {
+        "name": "cirrus-server",
+        "script": "cirrus2.js",
+        "instances": 1,
+        "autorestart": true,
+        "watch": false,
+        "time": true,
+        "env": {
+          "NODE_ENV": "production",
+          "PORT": 5508
+        }
+      }
+    ]
+  }
