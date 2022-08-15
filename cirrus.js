@@ -10,7 +10,7 @@ const rootCas=require('ssl-root-cas').create();
 const shttps=require("https");
 shttps.globalAgent.options.ca = rootCas;
 const agent = new shttps.Agent({ rejectUnauthorized: false });
-const SERVER= require("./common").SERVER;
+var SERVER= "";
 const MASTER = require("./common").MASTER;
 const cookieParser=require('cookie-parser');
 
@@ -24,6 +24,7 @@ logging.RegisterConsoleLogger();
 
 // Command line argument --configFile needs to be checked before loading the config, all other command line arguments are dealt with through the config object
 async function validateCookie(req,res,next){
+	SERVER=req.protocol+"://"+req.hostname+req.path;
 	var {cookies}=req;
 	let credentials=undefined;
 	if(cookies.session){
@@ -268,6 +269,7 @@ try {
 
 if(config.EnableWebserver) {
 	app.get('/', validateCookie, async function (req, res) {
+		SERVER=req.protocol+"://"+req.hostname+req.path;
 		homepageFile = (typeof config.HomepageFile != 'undefined' && config.HomepageFile != '') ? config.HomepageFile.toString() : defaultConfig.HomepageFile;
 		homepageFilePath = path.join(__dirname, homepageFile)
 
