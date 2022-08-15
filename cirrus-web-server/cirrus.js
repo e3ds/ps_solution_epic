@@ -228,7 +228,7 @@ if(config.UseAuthentication){
 }
 
 async function validateCookie(req,res,next){
-	SERVER=req.protocol+"://"+req.get('origin')+req.path;
+	SERVER=req.protocol+"://"+req.headers.origin+req.path;
 	var {cookies}=req;
 	if(cookies.__session){
 		let flag=await axios.get(MASTER+"/log?token="+cookies.__session).then((result)=>result.data).catch(err=>console.log(err));
