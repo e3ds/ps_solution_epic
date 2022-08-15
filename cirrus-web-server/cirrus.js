@@ -10,7 +10,7 @@ const rootCas=require('ssl-root-cas').create();
 const shttps=require("https");
 shttps.globalAgent.options.ca = rootCas;
 const agent = new shttps.Agent({ rejectUnauthorized: false });
-const SERVER= require("./common").SERVER;
+var SERVER= "";
 const MASTER = require("./common").MASTER;
 const cookieParser=require('cookie-parser');
 
@@ -228,6 +228,7 @@ if(config.UseAuthentication){
 }
 
 async function validateCookie(req,res,next){
+	SERVER=req.protocol+"://"+req.hostname+req.path;
 	var {cookies}=req;
 	if(cookies.__session){
 		let flag=await axios.get(MASTER+"/log?token="+cookies.__session).then((result)=>result.data).catch(err=>console.log(err));
@@ -249,7 +250,7 @@ async function validateCookie(req,res,next){
   }
 
 app.get('/clear',(req,res)=>{
-	
+
 	if(req.cookies.__session){
 		res.clearCookie("__session");
 	}
