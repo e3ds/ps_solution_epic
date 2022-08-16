@@ -227,27 +227,44 @@ if(config.UseAuthentication){
 	);
 }
 
-async function validateCookie(req,res,next){
-	SERVER=req.protocol+"://"+req.ip+req.path;
-	var {cookies}=req;
-	if(cookies.__session){
-		let flag=await axios.get(MASTER+"/log?token="+cookies.__session).then((result)=>result.data).catch(err=>console.log(err));
-		if (flag=="Signed"){
-			if(req.session.loggedIn){
-				next();
-			}else{
-				res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
-			}
-		}else{
-			res.redirect('/clear');
-		}
-		
-	}else{
-		console.log("No cookie");
-		res.redirect(MASTER+'/sign?curl='+SERVER);
-	}
 
-  }
+async function validateCookie(req,res,next){
+	if(req.session.original){
+		SERVER=req.session.original;
+		var {cookies}=req;
+		if(cookies.__session){
+			let flag=await axios.get(MASTER+"/log?token="+cookies.__session).then((result)=>result.data).catch(err=>console.log(err));
+			if (flag=="Signed"){
+				if(req.session.loggedIn){
+					next();
+				}else{
+					res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
+				}
+			}else{
+				res.redirect('/clear');
+			}
+			
+		}else{
+			console.log("No cookie");
+			res.redirect(MASTER+'/sign?curl='+SERVER);
+		}
+	}else {
+		res.redirect('/demo');
+	}
+}
+
+
+
+app.get('/demo',(req,res)=>{
+	res.sendFile('/home/ubuntu/ps_solution_epic/cirrus-web-server/www/demo.html')
+});
+
+app.get('/dom',(req,res)=>{
+	console.log("dom");
+	req.session.original=req.query.original;
+	console.log(req.session.original);
+	res.redirect('/');
+});
 
 app.get('/clear',(req,res)=>{
 
