@@ -229,6 +229,7 @@ if(config.UseAuthentication){
 
 
 async function validateCookie(req,res,next){
+	req.session.route = req.path;
 	if(req.session.original){
 		SERVER=req.session.original;
 		var {cookies}=req;
@@ -249,7 +250,7 @@ async function validateCookie(req,res,next){
 			res.redirect(MASTER+'/sign?curl='+SERVER);
 		}
 	}else {
-		req.session.route = req.path;
+		
 		res.redirect('/demo');
 	}
 }
