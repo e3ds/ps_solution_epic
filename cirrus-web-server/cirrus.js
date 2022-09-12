@@ -282,7 +282,8 @@ app.get('/auth',(req,res)=>{
 	let options = { maxAge: 86400*5000, httpOnly: true };
 	res.cookie("__session",token,options);
 	req.session.loggedIn=true;
-	res.redirect(curl);
+	// res.redirect(curl);
+	res.redirect(req.session.route);
 });
 
 if(config.EnableWebserver) {
