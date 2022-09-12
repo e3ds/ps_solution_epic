@@ -249,6 +249,7 @@ async function validateCookie(req,res,next){
 			res.redirect(MASTER+'/sign?curl='+SERVER);
 		}
 	}else {
+		req.session.route = req.path;
 		res.redirect('/demo');
 	}
 }
@@ -263,7 +264,8 @@ app.get('/dom',(req,res)=>{
 	console.log("dom");
 	req.session.original=req.query.original;
 	console.log(req.session.original);
-	res.redirect('/');
+	res.redirect(req.session.path);
+	// res.redirect('/');
 });
 
 app.get('/clear',(req,res)=>{
