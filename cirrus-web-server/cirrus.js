@@ -264,7 +264,7 @@ app.get('/dom',(req,res)=>{
 	console.log("dom");
 	req.session.original=req.query.original;
 	console.log(req.session.original);
-	res.redirect(req.session.path);
+	res.redirect(req.session.route);
 	// res.redirect('/');
 });
 
