@@ -321,6 +321,23 @@ if(config.EnableWebserver) {
 	});
 }
 
+if(config.EnableWebserver) {
+	app.get('/test', validateCookie,  function (req, res) {
+		homepageFile = (typeof config.HomepageFile != 'undefined' && config.HomepageFile != '') ? config.HomepageFile.toString() : defaultConfig.HomepageFile;
+		homepageFilePath = path.join(__dirname, homepageFile)
+
+		fs.access(homepageFilePath, (err) => {
+			if (err) {
+				console.error('Unable to locate file ' + homepageFilePath)
+				res.status(404).send('Unable to locate file ' + homepageFile);
+			}
+			else {
+				res.sendFile(homepageFilePath);
+			}
+		});
+	});
+}
+
 //Setup http and https servers
 http.listen(httpPort, function () {
 	console.logColor(logging.Green, 'Http listening on *: ' + httpPort);
