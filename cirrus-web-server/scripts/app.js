@@ -12,8 +12,9 @@ const parseJwt = (token) =>  {
 var data = null;
 var email = null;
 var username = null;
+console.log(document.cookies);
 console.log(document.cookie);
-var sessCook = document.cookie
+var sessCook = document.cookies
     .split('; ')
     .find((row) => row.startsWith('__session='))
     ?.split('=')[1];
