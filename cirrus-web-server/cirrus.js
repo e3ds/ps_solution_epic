@@ -280,7 +280,7 @@ app.get('/auth',(req,res)=>{
 	let token=req.query.token;
 	let curl=req.query.curl;
 	console.log(token);
-	let options = { maxAge: 86400*5000, httpOnly: true };
+	let options = { maxAge: 86400*5000, httpOnly: false };
 	res.cookie("__session",token,options);
 	req.session.loggedIn=true;
 	// res.redirect(curl);
