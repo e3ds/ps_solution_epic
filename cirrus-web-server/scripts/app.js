@@ -12,12 +12,15 @@ const parseJwt = (token) =>  {
 var data = null;
 var email = null;
 var username = null;
+console.log(document.cookie);
 var sessCook = document.cookie
     .split('; ')
     .find((row) => row.startsWith('__session='))
     ?.split('=')[1];
+console.log(sessCook);
 if (sessCook) {
     data = parseJwt(sessCook);
+    console.log(data);
     email = data.email;
     console.log("Logged in by "+email);
 }
