@@ -19,7 +19,7 @@ var sessCook = document.cookie
 if (sessCook) {
     data = parseJwt(sessCook);
     email = data.email;
-    console.log("Logged in by +"email);
+    console.log("Logged in by "+email);
 }
 // Window events for a gamepad connecting
 let haveEvents = 'GamepadEvent' in window;
