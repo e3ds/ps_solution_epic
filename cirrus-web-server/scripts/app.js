@@ -1,5 +1,25 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+const parseJwt = (token) =>  {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
 
+    return JSON.parse(jsonPayload);
+};
+
+var data = null;
+var email = null;
+var username = null;
+var sessCook = document.cookie
+    .split('; ')
+    .find((row) => row.startsWith('__session='))
+    ?.split('=')[1];
+if (sessCook)
+    data = parseJwt(sessCook);
+    email = data.email;
+    console.log("Logged in by +"email);
 // Window events for a gamepad connecting
 let haveEvents = 'GamepadEvent' in window;
 let haveWebkitEvents = 'WebKitGamepadEvent' in window;
