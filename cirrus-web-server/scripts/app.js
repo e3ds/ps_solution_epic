@@ -16,10 +16,11 @@ var sessCook = document.cookie
     .split('; ')
     .find((row) => row.startsWith('__session='))
     ?.split('=')[1];
-if (sessCook)
+if (sessCook) {
     data = parseJwt(sessCook);
     email = data.email;
     console.log("Logged in by +"email);
+}
 // Window events for a gamepad connecting
 let haveEvents = 'GamepadEvent' in window;
 let haveWebkitEvents = 'WebKitGamepadEvent' in window;
