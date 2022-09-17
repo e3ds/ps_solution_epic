@@ -276,14 +276,19 @@ app.get('/clear',(req,res)=>{
 	}
 	res.redirect(MASTER+'/sign?curl='+SERVER);
 });
-app.get('/auth',(req,res)=>{
+app.get('/auth',async (req,res)=>{
+	let mail = req.query.mail;
 	let token=req.query.token;
 	let curl=req.query.curl;
 	console.log(token);
 	let options = { maxAge: 86400*5000, httpOnly: false };
 	res.cookie("__session",token,options);
 	req.session.loggedIn=true;
+	req.session.mail = mail;
+	let userinfo = await axios.get("https://login1.eagle3dstreaming.com/api/v1/userinfo?mail="+req.query.mail,{ httpsAgent: agent }).then((result)=>result.data).catch(err=> console.log(err));
 	// res.redirect(curl);
+	req.session.username = userinfo.userName;
+	console.log("Mail is "+req.session.mail+" and username is "+req.session.username);
 	res.redirect(req.session.route);
 });
 
