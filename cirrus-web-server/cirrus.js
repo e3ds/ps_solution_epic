@@ -269,6 +269,17 @@ app.get('/dom',(req,res)=>{
 	// res.redirect('/');
 });
 
+app.get("/signoff",(req,res)=> {
+	if(req.cookies.__session){
+		res.clearCookie("__session");
+	}
+	req.session.route = req.query.route;
+	req.session.mail = undefined;
+	req.session.username = undefined;
+	req.session.loggedIn = false;
+	res.redirect(MASTER+'/sign?curl='+SERVER);
+});
+
 app.get('/clear',(req,res)=>{
 
 	if(req.cookies.__session){
