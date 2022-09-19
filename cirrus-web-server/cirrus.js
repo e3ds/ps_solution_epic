@@ -279,8 +279,8 @@ app.get("/signoff",(req,res)=> {
 	req.session.username = undefined;
 	req.session.loggedIn = false;
 	let text= JSON.stringify({continueUrl:SERVER , timestamp: new Date().getTime() });
-	let base=Buffer.from(text).toString('base64');;
-	res.redirect(MASTER+'/signin?uri='+SERVER);
+	let base=Buffer.from(text).toString('base64');
+	res.redirect(MASTER+'/signin?uri='+base);
 });
 
 app.get('/clear',(req,res)=>{
