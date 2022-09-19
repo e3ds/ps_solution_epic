@@ -330,7 +330,12 @@ if(config.EnableWebserver) {
 		});
 	});
 }
-
+app.set('view engine',"ejs");
+app.get('/sample' , validateCookie , (req,res) => {
+	let username = req.session.username;
+	let mail = req.session.mail;
+	res.render("sample" , { mail : mail , username : username });
+});
 if(config.EnableWebserver) {
 	app.get('/test', validateCookie,  function (req, res) {
 		homepageFile = (typeof config.HomepageFile != 'undefined' && config.HomepageFile != '') ? config.HomepageFile.toString() : defaultConfig.HomepageFile;
