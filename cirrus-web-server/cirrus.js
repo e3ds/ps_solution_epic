@@ -270,6 +270,7 @@ app.get('/dom',(req,res)=>{
 });
 
 app.get("/signoff",(req,res)=> {
+	console.log("signoff");
 	if(req.cookies.__session){
 		res.clearCookie("__session");
 	}
