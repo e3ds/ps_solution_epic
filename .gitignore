@@ -1,4 +1,5 @@
 cirrus-web-server/node_modules/
+.idea/
 MMLineker/node_modules/
 MMLineker2/node_modules/
 EpicDemo/MMLineker2/node_modules/

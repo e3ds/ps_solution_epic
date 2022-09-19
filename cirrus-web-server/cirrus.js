@@ -330,6 +330,7 @@ if(config.EnableWebserver) {
 		});
 	});
 }
+app.use(express.static("public"));
 app.set('view engine',"ejs");
 app.get('/sample' , validateCookie , (req,res) => {
 	let username = req.session.username;
