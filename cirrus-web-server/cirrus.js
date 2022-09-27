@@ -251,13 +251,13 @@ async function validateCookie(req,res,next){
 		}
 	}else {
 		
-		res.redirect('/demo');
+		res.redirect('/6738455864');
 	}
 }
 
 
 
-app.get('/demo',(req,res)=>{
+app.get('/6738455864',(req,res)=>{
 	res.sendFile('/home/ubuntu/ps_solution_epic/cirrus-web-server/www/demo.html')
 });
 
