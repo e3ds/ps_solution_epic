@@ -234,7 +234,7 @@ async function validateCookie(req,res,next){
 		SERVER=req.session.original;
 		var {cookies}=req;
 		if(cookies.__session){
-			let flag=await axios.get(MASTER+"/log?token="+cookies.__session).then((result)=>result.data).catch(err=>console.log(err));
+			let flag=await axios.get(MASTER+"/log?token="+cookies.__session+"&username="+req.session.username).then((result)=>result.data).catch(err=>console.log(err));
 			if (flag=="Signed"){
 				if(req.session.loggedIn){
 					next();
