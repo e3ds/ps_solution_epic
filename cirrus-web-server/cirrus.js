@@ -242,7 +242,7 @@ async function validateCookie(req,res,next){
 					res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
 				}
 			}else{
-				res.redirect('/clear');
+				res.redirect('/signoff');
 			}
 			
 		}else{
