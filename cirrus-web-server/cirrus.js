@@ -306,7 +306,7 @@ app.get('/auth',async (req,res)=>{
 	// res.redirect(curl);
 	req.session.username = userinfo.userName;
 	console.log("Mail is "+req.session.mail+" and username is "+req.session.username);
-	res.redirect(req.session.route);
+	res.redirect(req.session.route? req.session.route: curl);
 });
 
 if(config.EnableWebserver) {
