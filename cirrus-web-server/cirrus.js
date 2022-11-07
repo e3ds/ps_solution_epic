@@ -232,7 +232,11 @@ async function validateCookie(req,res,next){
 	req.session.route = req.path;
 	if(req.session.original){
 		SERVER=req.session.original;
+		console.log("U=>"+req.session.username);
+		console.log("M=>"+req.session.mail);
+
 		var {cookies}=req;
+		console.log("C=>"+cookies.__session);
 		if(cookies.__session){
 			let flag=await axios.get(MASTER+"/log?token="+cookies.__session+"&username="+req.session.username+"&mail="+req.session.mail).then((result)=>result.data).catch(err=>console.log(err));
 			if (flag=="Signed"){
