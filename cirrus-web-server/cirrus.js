@@ -229,18 +229,19 @@ if(config.UseAuthentication){
 
 
 async function validateCookie(req,res,next){
+	var {cookies}=req;
 	req.session.route = req.path;
 	if(req.session.original){
 		SERVER=req.session.original;
-		console.log("U=>"+req.session.username);
-		console.log("M=>"+req.session.mail);
+		console.log("U=>"+cookies.__username);
+		console.log("M=>"+cookies.__mail);
 
-		var {cookies}=req;
 		console.log("C=>"+cookies.__session);
 		if(cookies.__session){
-			let flag=await axios.get(MASTER+"/log?token="+cookies.__session+"&username="+req.session.username+"&mail="+req.session.mail).then((result)=>result.data).catch(err=>console.log(err));
+			let flag=await axios.get(MASTER+"/log?token="+cookies.__session+"&username="+cookies.__username+"&mail="+cookies.__mail)
+				.then((result)=>result.data).catch(err=>console.log(err));
 			if (flag=="Signed"){
-				if(req.session.loggedIn){
+				if(cookies.__logged){
 					next();
 				}else{
 					res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
@@ -279,9 +280,9 @@ app.get("/signoff",(req,res)=> {
 		res.clearCookie("__session");
 	}
 	req.session.route = req.query.route;
-	req.session.mail = undefined;
-	req.session.username = undefined;
-	req.session.loggedIn = false;
+	res.clearCookie("__logged");
+	res.clearCookie("__mail");
+	res.clearCookie("__username");
 	let text= JSON.stringify({continueUrl:SERVER+'/auth?curl='+SERVER , timestamp: new Date().getTime() });
 	let base=Buffer.from(text).toString('base64');
 	res.redirect(MASTER+'/signin?uri='+base);
@@ -292,9 +293,9 @@ app.get('/clear',(req,res)=>{
 	if(req.cookies.__session){
 		res.clearCookie("__session");
 	}
-	req.session.mail = undefined;
-	req.session.username = undefined;
-	req.session.loggedIn = false;
+	res.clearCookie("__logged");
+	res.clearCookie("__mail");
+	res.clearCookie("__username");
 	res.redirect(MASTER+'/sign?curl='+SERVER);
 });
 app.get('/auth',async (req,res)=>{
@@ -304,12 +305,12 @@ app.get('/auth',async (req,res)=>{
 	console.log(token);
 	let options = { maxAge: 86400*5000, httpOnly: false };
 	res.cookie("__session",token,options);
-	req.session.loggedIn=true;
-	req.session.mail = mail;
+	res.cookie("__logged",true,options);
+	res.cookie("__mail",mail,options);
 	let userinfo = await axios.get("https://login1.eagle3dstreaming.com/api/v1/userinfo?mail="+req.query.mail,{ httpsAgent: agent }).then((result)=>result.data).catch(err=> console.log(err));
 	// res.redirect(curl);
-	req.session.username = userinfo.userName;
-	console.log("Mail is "+req.session.mail+" and username is "+req.session.username);
+	res.cookie("__username",userinfo.userName,options);
+	console.log("Mail is "+mail+" and username is "+userinfo.userName);
 	res.redirect(req.session.route? req.session.route: curl);
 });
 
@@ -351,8 +352,9 @@ if(config.EnableWebserver) {
 app.use(express.static("public"));
 app.set('view engine',"ejs");
 app.get('/sample' , validateCookie , (req,res) => {
-	let username = req.session.username;
-	let mail = req.session.mail;
+	var {cookies}=req;
+	let username = cookies.__username;
+	let mail = cookeis.__mail;
 	res.render("sample" , { mail : mail , username : username });
 });
 if(config.EnableWebserver) {
