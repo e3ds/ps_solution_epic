@@ -697,7 +697,7 @@ function onFullscreenChange() {
 
 function parseURLParams() {
     let urlParams = new URLSearchParams(window.location.search);
-    inputOptions.controlScheme =1// (urlParams.has('hoveringMouse') ?  ControlSchemeType.HoveringMouse : ControlSchemeType.LockedMouse);
+    inputOptions.controlScheme = (urlParams.has('hoveringMouse') ?  ControlSchemeType.HoveringMouse : ControlSchemeType.LockedMouse);
     let schemeToggle = document.getElementById("control-scheme-text");
     switch (inputOptions.controlScheme) {
         case ControlSchemeType.HoveringMouse:
@@ -1392,6 +1392,9 @@ function setupStats(){
 
         // Calculate duration of run
         let runTime = (aggregatedStats.timestamp - aggregatedStats.timestampStart) / 1000;
+
+        let durattionTime = (aggregatedStats.timestamp - aggregatedStats.timestampStart);
+
         let timeValues = [];
         let timeDurations = [60, 60];
         for (let timeIndex = 0; timeIndex < timeDurations.length; timeIndex++) {
@@ -1490,6 +1493,22 @@ function setupStats(){
         statsText += `<div>Packets Lost: ${aggregatedStats.hasOwnProperty('packetsLost') ? numberFormat.format(aggregatedStats.packetsLost) : 'Chrome only'}</div>`;
         statsText += `<div>Framerate: ${aggregatedStats.hasOwnProperty('framerate') ? numberFormat.format(aggregatedStats.framerate) : 'Chrome only'}</div>`;
         statsText += `<div>Frames dropped: ${aggregatedStats.hasOwnProperty('framesDropped') ? numberFormat.format(aggregatedStats.framesDropped) : 'Chrome only'}</div>`;
+
+        statsText += `<div>Frames time: ${aggregatedStats.hasOwnProperty('timestamp') ? numberFormat.format(aggregatedStats.timestamp) : 'Chrome only'}</div>`;
+ 
+        statsText += `<div>runtime: ${aggregatedStats.hasOwnProperty('timestamp') ? durattionTime : 'Chrome only'}</div>`;
+
+        statsText += `<div>jitter: ${aggregatedStats.hasOwnProperty('jitter') ? aggregatedStats.jitter : 'Chrome only'}</div>`;
+
+        statsText += `<div>jitterBufferDelay: ${aggregatedStats.hasOwnProperty('jitterBufferDelay') ? aggregatedStats.jitterBufferDelay : 'Chrome only'}</div>`;
+
+        statsText += `<div>keyFramesDecoded: ${aggregatedStats.hasOwnProperty('keyFramesDecoded') ? aggregatedStats.keyFramesDecoded : 'Chrome only'}</div>`;
+
+        statsText += `<div>availableOutgoingBitrate: ${aggregatedStats.hasOwnProperty('availableOutgoingBitrate') ? aggregatedStats.availableOutgoingBitrate : 'Chrome only'}</div>`;
+
+ 
+
+
         statsText += `<div>Net RTT (ms): ${aggregatedStats.hasOwnProperty('currentRoundTripTime') ? numberFormat.format(aggregatedStats.currentRoundTripTime * 1000) : 'Can\'t calculate'}</div>`;
         statsText += `<div>Browser receive to composite (ms): ${aggregatedStats.hasOwnProperty('receiveToCompositeMs') ? numberFormat.format(aggregatedStats.receiveToCompositeMs) : 'Chrome only'}</div>`;
         statsText += `<div style="color: ${color}">Audio Bitrate (kbps): ${aggregatedStats.hasOwnProperty('audioBitrate') ? numberFormat.format(aggregatedStats.audioBitrate) : 'Chrome only'}</div>`;
@@ -1573,7 +1592,7 @@ let styleHeight;
 let styleTop;
 let styleLeft;
 let styleCursor = 'default';
-let styleAdditional = "cursor: default";
+let styleAdditional;
 
 const ControlSchemeType = {
     // A mouse can lock inside the WebRTC player so the user can simply move the
@@ -1589,8 +1608,7 @@ const ControlSchemeType = {
 let inputOptions = {
     // The control scheme controls the behaviour of the mouse when it interacts
     // with the WebRTC player.
-   // controlScheme: ControlSchemeType.LockedMouse,
-    controlScheme: ControlSchemeType.HoveringMouse,
+    controlScheme: ControlSchemeType.LockedMouse,
 
     // Browser keys are those which are typically used by the browser UI. We
     // usually want to suppress these to allow, for example, UE to show shader

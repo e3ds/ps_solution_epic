@@ -364,6 +364,11 @@ function webRtcPlayer(parOptions) {
                     newStat.framesDecodedStart = self.aggregatedStats && self.aggregatedStats.framesDecodedStart ? self.aggregatedStats.framesDecodedStart : stat.framesDecoded;
                     newStat.timestampStart = self.aggregatedStats && self.aggregatedStats.timestampStart ? self.aggregatedStats.timestampStart : stat.timestamp;
 
+
+                    newStat.jitter = stat.jitter;
+                    newStat.jitterBufferDelay = stat.jitterBufferDelay;
+                    newStat.keyFramesDecoded = stat.keyFramesDecoded;
+
                     if(self.aggregatedStats && self.aggregatedStats.timestamp){
 
                         // Get the mimetype of the video codec being used
@@ -439,6 +444,7 @@ function webRtcPlayer(parOptions) {
 
                 if(stat.type ==='candidate-pair' && stat.hasOwnProperty('currentRoundTripTime') && stat.currentRoundTripTime != 0){
                     newStat.currentRoundTripTime = stat.currentRoundTripTime;
+                    newStat.availableOutgoingBitrate = stat.availableOutgoingBitrate;
                 }
 
                 // Store mimetype of each codec
