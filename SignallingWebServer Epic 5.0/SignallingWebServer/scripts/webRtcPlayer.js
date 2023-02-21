@@ -338,11 +338,13 @@ function webRtcPlayer(parOptions) {
         pc.ondatachannel = onDataChannel;
     };
 
-    generateAggregatedStatsFunction = function(){
+    generateAggregatedStatsFunction = function()
+	{
         if(!self.aggregatedStats)
             self.aggregatedStats = {};
 
-        return function(stats){
+        return function(stats)
+		{
             
             let newStat = {};
 
@@ -468,6 +470,136 @@ function webRtcPlayer(parOptions) {
                 self.onAggregatedStats(newStat)
         }
     };
+
+
+		function ahsan(stats)
+		{
+            
+            let newStat = {};
+
+            // store each type of codec we can get stats on
+            newStat.codecs = {};
+
+            stats.forEach(stat => {
+
+                // Get the inbound-rtp for video
+                if (stat.type === 'inbound-rtp' 
+                    && !stat.isRemote 
+                    && (stat.mediaType === 'video' || stat.id.toLowerCase().includes('video'))) {
+
+                    newStat.timestamp = stat.timestamp;
+                    newStat.bytesReceived = stat.bytesReceived;
+                    newStat.framesDecoded = stat.framesDecoded;
+                    newStat.packetsLost = stat.packetsLost;
+                    newStat.bytesReceivedStart = self.aggregatedStats && self.aggregatedStats.bytesReceivedStart ? self.aggregatedStats.bytesReceivedStart : stat.bytesReceived;
+                    newStat.framesDecodedStart = self.aggregatedStats && self.aggregatedStats.framesDecodedStart ? self.aggregatedStats.framesDecodedStart : stat.framesDecoded;
+                    newStat.timestampStart = self.aggregatedStats && self.aggregatedStats.timestampStart ? self.aggregatedStats.timestampStart : stat.timestamp;
+
+
+                    newStat.jitter = stat.jitter;
+                    newStat.jitterBufferDelay = stat.jitterBufferDelay;
+                    newStat.keyFramesDecoded = stat.keyFramesDecoded;
+
+                    if(self.aggregatedStats && self.aggregatedStats.timestamp){
+
+                        // Get the mimetype of the video codec being used
+                        if(stat.codecId && self.aggregatedStats.codecs && self.aggregatedStats.codecs.hasOwnProperty(stat.codecId)){
+                            newStat.videoCodec = self.aggregatedStats.codecs[stat.codecId];
+                        }
+
+                        if(self.aggregatedStats.bytesReceived){
+                            // bitrate = bits received since last time / number of ms since last time
+                            //This is automatically in kbits (where k=1000) since time is in ms and stat we want is in seconds (so a '* 1000' then a '/ 1000' would negate each other)
+                            newStat.bitrate = 8 * (newStat.bytesReceived - self.aggregatedStats.bytesReceived) / (newStat.timestamp - self.aggregatedStats.timestamp);
+                            newStat.bitrate = Math.floor(newStat.bitrate);
+                            newStat.lowBitrate = self.aggregatedStats.lowBitrate && self.aggregatedStats.lowBitrate < newStat.bitrate ? self.aggregatedStats.lowBitrate : newStat.bitrate
+                            newStat.highBitrate = self.aggregatedStats.highBitrate && self.aggregatedStats.highBitrate > newStat.bitrate ? self.aggregatedStats.highBitrate : newStat.bitrate
+                        }
+
+                        if(self.aggregatedStats.bytesReceivedStart){
+                            newStat.avgBitrate = 8 * (newStat.bytesReceived - self.aggregatedStats.bytesReceivedStart) / (newStat.timestamp - self.aggregatedStats.timestampStart);
+                            newStat.avgBitrate = Math.floor(newStat.avgBitrate);
+                        }
+
+                        if(self.aggregatedStats.framesDecoded){
+                            // framerate = frames decoded since last time / number of seconds since last time
+                            newStat.framerate = (newStat.framesDecoded - self.aggregatedStats.framesDecoded) / ((newStat.timestamp - self.aggregatedStats.timestamp) / 1000);
+                            newStat.framerate = Math.floor(newStat.framerate);
+                            newStat.lowFramerate = self.aggregatedStats.lowFramerate && self.aggregatedStats.lowFramerate < newStat.framerate ? self.aggregatedStats.lowFramerate : newStat.framerate
+                            newStat.highFramerate = self.aggregatedStats.highFramerate && self.aggregatedStats.highFramerate > newStat.framerate ? self.aggregatedStats.highFramerate : newStat.framerate
+                        }
+
+                        if(self.aggregatedStats.framesDecodedStart){
+                            newStat.avgframerate = (newStat.framesDecoded - self.aggregatedStats.framesDecodedStart) / ((newStat.timestamp - self.aggregatedStats.timestampStart) / 1000);
+                            newStat.avgframerate = Math.floor(newStat.avgframerate);
+                        }
+                    }
+                }
+
+                // Get inbound-rtp for audio
+                if (stat.type === 'inbound-rtp' 
+                    && !stat.isRemote 
+                    && (stat.mediaType === 'audio' || stat.id.toLowerCase().includes('audio'))) {
+
+                    // Get audio bytes received
+                    if(stat.bytesReceived){
+                        newStat.audioBytesReceived = stat.bytesReceived;
+                    }
+
+                    // As we loop back through we may wish to compute some stats based on a delta of the previous time we recorded the stat
+                    if(self.aggregatedStats && self.aggregatedStats.timestamp){
+
+                        // Get the mimetype of the audio codec being used
+                        if(stat.codecId && self.aggregatedStats.codecs && self.aggregatedStats.codecs.hasOwnProperty(stat.codecId)){
+                            newStat.audioCodec = self.aggregatedStats.codecs[stat.codecId];
+                        }
+
+                        // Determine audio bitrate delta over the time period
+                        if(self.aggregatedStats.audioBytesReceived){
+                            newStat.audioBitrate = 8 * (newStat.audioBytesReceived - self.aggregatedStats.audioBytesReceived) / (stat.timestamp - self.aggregatedStats.timestamp);
+                            newStat.audioBitrate = Math.floor(newStat.audioBitrate);
+                        }
+                    }
+                }
+
+                //Read video track stats
+                if(stat.type === 'track' && (stat.trackIdentifier === 'video_label' || stat.kind === 'video')) {
+                    newStat.framesDropped = stat.framesDropped;
+                    newStat.framesReceived = stat.framesReceived;
+                    newStat.framesDroppedPercentage = stat.framesDropped / stat.framesReceived * 100;
+                    newStat.frameHeight = stat.frameHeight;
+                    newStat.frameWidth = stat.frameWidth;
+                    newStat.frameHeightStart = self.aggregatedStats && self.aggregatedStats.frameHeightStart ? self.aggregatedStats.frameHeightStart : stat.frameHeight;
+                    newStat.frameWidthStart = self.aggregatedStats && self.aggregatedStats.frameWidthStart ? self.aggregatedStats.frameWidthStart : stat.frameWidth;
+                }
+
+                if(stat.type ==='candidate-pair' && stat.hasOwnProperty('currentRoundTripTime') && stat.currentRoundTripTime != 0){
+                    newStat.currentRoundTripTime = stat.currentRoundTripTime;
+                    newStat.availableOutgoingBitrate = stat.availableOutgoingBitrate;
+                }
+
+                // Store mimetype of each codec
+                if(newStat.hasOwnProperty('codecs') && stat.type === 'codec' && stat.mimeType && stat.id){
+                    const codecId = stat.id;
+                    const codecType = stat.mimeType.replace("video/", "").replace("audio/", "");
+                    newStat.codecs[codecId] = codecType;
+                }
+
+            });
+
+            if(self.aggregatedStats.receiveToCompositeMs)
+            {
+                newStat.receiveToCompositeMs = self.aggregatedStats.receiveToCompositeMs;
+                self.latencyTestTimings.SetFrameDisplayDeltaTime(self.aggregatedStats.receiveToCompositeMs);
+            }
+
+            self.aggregatedStats = newStat;
+
+            if(self.onAggregatedStats)
+                self.onAggregatedStats(newStat)
+        }
+   // };
+
 
     setupTransceiversAsync = async function(pc){
         
@@ -684,17 +816,54 @@ function webRtcPlayer(parOptions) {
         }
     };
 
-    this.getStats = function(onStats){
-        if(self.pcClient && onStats){
-            self.pcClient.getStats(null).then((stats) => { 
-                onStats(stats); 
-            });
+    this.getStats = function(onStats)
+	{
+        if(self.pcClient && onStats)
+		{
+            self.pcClient.getStats(null).then((stats) => 
+														{ 
+															onStats(stats); 
+														});
         }
     }
 
-    this.aggregateStats = function(checkInterval){
+    this.aggregateStats = function(checkInterval)
+	{
         let calcAggregatedStats = generateAggregatedStatsFunction();
         let printAggregatedStats = () => { self.getStats(calcAggregatedStats); }
-        self.aggregateStatsIntervalId = setInterval(printAggregatedStats, checkInterval);
+        self.aggregateStatsIntervalId = 
+		//setInterval(printAggregatedStats, checkInterval);
+		
+		setInterval(	function() 
+						{
+							//self.getStats(calcAggregatedStats);
+							//onStats=calcAggregatedStats
+							 if(self.pcClient && calcAggregatedStats)
+								{
+									/* self.pcClient.getStats(null).then((stats) => 
+																				{ 
+																					calcAggregatedStats(stats); 
+																				}); */
+																				
+									self.pcClient.getStats(null).then(
+																		function(stats)
+																		{
+																			 console.log(JSON.stringify(stats));
+																			//calcAggregatedStats(stats); 
+																			//generateAggregatedStatsFunction(stats); 
+																			ahsan(stats); 
+																			console.log(typeof stats);
+																		
+																			console.log(stats);
+																			//console.log(JSON.stringify(stats));
+																		}
+																	 ).catch(function(error){
+																			console.error(`Failed t getStats(), reason: ${error}`);
+																		});											
+																				
+								}
+		
+						}, 
+						 1000);
     }
 }
