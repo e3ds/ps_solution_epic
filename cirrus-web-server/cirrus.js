@@ -354,7 +354,7 @@ app.set('view engine',"ejs");
 app.get('/sample' , validateCookie , (req,res) => {
 	var {cookies}=req;
 	let username = cookies.__username;
-	let mail = cookeis.__mail;
+	let mail = cookies.__mail;
 	res.render("sample" , { mail : mail , username : username });
 });
 if(config.EnableWebserver) {
