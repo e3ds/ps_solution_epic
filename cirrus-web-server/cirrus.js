@@ -279,7 +279,7 @@ app.get("/reset",(req,res)=> {
 	if(req.cookies.__session){
 		res.clearCookie("__session");
 	}
-	req.session.route = req.query.route;
+
 	res.clearCookie("__logged");
 	res.clearCookie("__mail");
 	res.clearCookie("__username");
