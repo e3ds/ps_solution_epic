@@ -263,7 +263,7 @@ async function validateCookie(req,res,next){
 
 
 app.get('/6738455864',(req,res)=>{
-	res.sendFile('/Users/anind/codebase/ps_solution_epic/cirrus-web-server/www/demo.html')
+	res.sendFile('/home/ubuntu/ps_solution_epic/cirrus-web-server/www/demo.html')
 });
 
 app.get('/dom',(req,res)=>{
