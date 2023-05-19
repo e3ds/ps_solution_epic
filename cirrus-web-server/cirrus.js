@@ -285,7 +285,7 @@ app.get("/signoff",(req,res)=> {
 	res.clearCookie("__username");
 	let text= JSON.stringify({continueUrl:SERVER+'/auth?curl='+SERVER , timestamp: new Date().getTime() });
 	let base=Buffer.from(text).toString('base64');
-	res.redirect(MASTER+'/signin?uri='+base);
+	res.redirect(MASTER+'/sign?curl='+SERVER);
 });
 
 app.get('/clear',(req,res)=>{
