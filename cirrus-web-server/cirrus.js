@@ -247,7 +247,7 @@ async function validateCookie(req,res,next){
 					res.redirect(MASTER+'/sign?token='+cookies.__session+'&curl='+SERVER);
 				}
 			}else{
-				res.redirect('/signoff');
+				res.redirect('/reset');
 			}
 			
 		}else{
@@ -263,7 +263,7 @@ async function validateCookie(req,res,next){
 
 
 app.get('/6738455864',(req,res)=>{
-	res.sendFile('/home/ubuntu/ps_solution_epic/cirrus-web-server/www/demo.html')
+	res.sendFile('/Users/anind/codebase/ps_solution_epic/cirrus-web-server/www/demo.html')
 });
 
 app.get('/dom',(req,res)=>{
@@ -272,6 +272,19 @@ app.get('/dom',(req,res)=>{
 	console.log(req.session.original);
 	res.redirect(req.session.route);
 	// res.redirect('/');
+});
+
+app.get("/reset",(req,res)=> {
+	console.log("reset");
+	if(req.cookies.__session){
+		res.clearCookie("__session");
+	}
+	req.session.route = req.query.route;
+	res.clearCookie("__logged");
+	res.clearCookie("__mail");
+	res.clearCookie("__username");
+
+	res.redirect(MASTER+'/sign?curl='+SERVER);
 });
 
 app.get("/signoff",(req,res)=> {
@@ -285,7 +298,7 @@ app.get("/signoff",(req,res)=> {
 	res.clearCookie("__username");
 	let text= JSON.stringify({continueUrl:SERVER+'/auth?curl='+SERVER , timestamp: new Date().getTime() });
 	let base=Buffer.from(text).toString('base64');
-	res.redirect(MASTER+'/sign?curl='+SERVER);
+	res.redirect(MASTER+'/signin?uri='+base);
 });
 
 app.get('/clear',(req,res)=>{
