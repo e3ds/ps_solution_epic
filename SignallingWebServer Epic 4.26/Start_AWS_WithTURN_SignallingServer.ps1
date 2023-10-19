@@ -7,7 +7,7 @@ Write-Output "Public IP: $PublicIp"
 $peerConnectionOptions = "{ \""iceServers\"": [{\""urls\"": [\""stun:" + $PublicIp + ":19302\"",\""turn:" + $PublicIp + ":19303\""], \""username\"": \""PixelStreamingUser\"", \""credential\"": \""Another TURN in the road\""}] }"
 
 $ProcessExe = "node.exe"
-$Arguments = @("cirrus", "--peerConnectionOptions=""$peerConnectionOptions""", "--publicIp=$PublicIp")
+$Arguments = @("cirrus", "--peerConnectionOptions=""$peerConnectionOptions""", "--publicIp=$PublicIp","--doServerBuild=$PublicIp)
 # Add arguments passed to script to Arguments for executable
 $Arguments += $args
 

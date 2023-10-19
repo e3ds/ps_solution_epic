@@ -483,13 +483,23 @@ function mapToObj(inputMap) {
 
     return obj;
 }
-
+	this.iceStateFaileStateHappend=false	
 		function ahsan(stats)
 		{
 			console.log([...stats.entries()]);
 			//var returnedObject= mapToObj(stats)
 			var returnedObject= Object.fromEntries(stats);
 			
+			if(returnedObject.T01.iceState == "failed")
+			{
+				if(!this.iceStateFaileStateHappend)
+				{
+					this.iceStateFaileStateHappend=true
+					console.warn('T01.iceState failed permannelty ');
+				}
+			}
+			
+			console.log("T01.iceState: "+returnedObject.T01.iceState);
 			console.log(returnedObject);
 			console.log(JSON.stringify(returnedObject))
 			if(!self.aggregatedStats)
