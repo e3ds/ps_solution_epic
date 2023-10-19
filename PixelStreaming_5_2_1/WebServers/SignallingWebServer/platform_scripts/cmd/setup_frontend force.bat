@@ -22,7 +22,8 @@
     if "%shouldbuild%" == "true" (
       call :buildFrontend
     ) else (
-      echo Skipping rebuilding frontend... SignallingWebServer/Public has content already, use --build to force a frontend rebuild.
+      ::echo Skipping rebuilding frontend... SignallingWebServer/Public has content already, use --build to force a frontend rebuild.
+	  call :buildFrontend
     )
   ) else (
     call :buildFrontend
