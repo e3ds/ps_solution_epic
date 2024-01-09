@@ -1,5 +1,5 @@
 import * as __WEBPACK_EXTERNAL_MODULE_sdp__ from "sdp";
-/******/ var __webpack_modules__ = ({
+/***1***/ var __webpack_modules__ = ({
 
 /***/ "./src/AFK/AFKController.ts":
 /*!**********************************!*\
