@@ -368,8 +368,15 @@ streamerServer.on('connection', function (ws, req) {
 	});
 
 	streamer = ws;
+	
+	clientConfig={ type: "connect", connectionId: "abcs", polite: true }
 
-	streamer.send(JSON.stringify(clientConfig));
+var sfsgsg=JSON.stringify(clientConfig)
+
+console.logColor(logging.Green, sfsgsg);
+	streamer.send(sfsgsg);
+	
+	 //ws.send(JSON.stringify(clientConfig));
 });
 
 let playerServer = new WebSocket.Server({ server: config.UseHTTPS ? https : http});
