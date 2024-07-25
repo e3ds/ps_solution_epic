@@ -32,7 +32,7 @@
 	"MatchmakerAddress": "",
 	"MatchmakerPort": 9999,
 	"PublicIp": "localhost",
-	"HttpPort": 80,
+	"HttpPort": 801,
 	"HttpsPort": 443,
 	"StreamerPort": 8888,
 	"SFUPort": 8889,
