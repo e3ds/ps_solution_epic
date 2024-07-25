@@ -60,3 +60,6 @@ AhsanPS_B/Eagle3dStreaming/Eagle3dStreaming.7z.tmp
 
 
 EL/.env
+/5_4_3/SignallingWebServer/node_modules
+/5_4_3/SignallingWebServer/platform_scripts/cmd/node/node_modules/npm/node_modules
+/5_4_3/SignallingWebServer/platform_scripts/cmd/node/node_modules
