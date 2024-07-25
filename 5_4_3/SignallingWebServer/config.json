@@ -6,6 +6,28 @@
 	"LogVerbose": true,
 	"HomepageFile": "player.html",
 	"AdditionalRoutes": {},
+	"peerConnectionOptions": {  
+  "iceServers": [
+    {
+      "urls": [
+        "stun:us-turn1.xirsys.com"
+      ]
+    },
+    {
+      "username": "Q1NOdAU-CVk_-UKQd_1h9ErKFl0dVkL7Pb3Oo0SxOrD-PsQBOoXtcmklKbI36wCNAAAAAGahu4plYWdsZTNkc3RyZWFtaW5n",
+      "credential": "82b3fc6c-4a2f-11ef-9159-0242ac140004",
+      "urls": [
+        "turn:us-turn1.xirsys.com:80?transport=udp",
+        "turn:us-turn1.xirsys.com:3478?transport=udp",
+        "turn:us-turn1.xirsys.com:80?transport=tcp",
+        "turn:us-turn1.xirsys.com:3478?transport=tcp",
+        "turns:us-turn1.xirsys.com:443?transport=tcp",
+        "turns:us-turn1.xirsys.com:5349?transport=tcp"
+      ]
+    }
+  ]
+}
+,
 	"EnableWebserver": true,
 	"MatchmakerAddress": "",
 	"MatchmakerPort": 9999,

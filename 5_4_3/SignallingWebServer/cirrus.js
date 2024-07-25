@@ -127,7 +127,8 @@ try {
 	}
 
 	if (typeof config.peerConnectionOptions != 'undefined') {
-		clientConfig.peerConnectionOptions = JSON.parse(config.peerConnectionOptions);
+		//clientConfig.peerConnectionOptions = JSON.parse(config.peerConnectionOptions);
+		clientConfig.peerConnectionOptions = config.peerConnectionOptions;  
 		console.log(`peerConnectionOptions = ${JSON.stringify(clientConfig.peerConnectionOptions)}`);
 	} else {
 		console.log("No peerConnectionConfig")
