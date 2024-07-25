@@ -5,7 +5,7 @@
 //+window.location.hostname
 //+
 //("80"===window.location.port||""===window.location.port?"":`:${window.location.port}`)
-"ws://ms6.eagle3dstreaming.com:801/"
+window.ss_url
 
 ,e)
 
