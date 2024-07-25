@@ -1,7 +1,7 @@
 {
 	"UseFrontend": false,
 	"UseMatchmaker": false,
-	"UseHTTPS": false,
+	"UseHTTPS": true,
 	"LogToFile": true,
 	"LogVerbose": true,
 	"HomepageFile": "player.html",
@@ -33,7 +33,7 @@
 	"MatchmakerPort": 9999,
 	"PublicIp": "localhost",
 	"HttpPort": 801,
-	"HttpsPort": 443,
+	"HttpsPort": 4431,
 	"StreamerPort": 8888,
 	"SFUPort": 8889,
 	"MaxPlayerCount": -1

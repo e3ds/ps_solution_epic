@@ -18,8 +18,8 @@ const defaultConfig = {
 	UseFrontend: false,
 	UseMatchmaker: false,
 	UseHTTPS: false,
-	HTTPSCertFile: './certificates/client-cert.pem',
-	HTTPSKeyFile: './certificates/client-key.pem',
+	HTTPSCertFile: 'C:/0.ps/ahsanpixelstreaming/Extras/sslCertificates/astarix.eagle3dstreaming.com-cert.pem',
+	HTTPSKeyFile: 'C:/0.ps/ahsanpixelstreaming/Extras/sslCertificates/astarix.eagle3dstreaming.com-key.pem',
 	LogToFile: true,
 	LogVerbose: true,
 	HomepageFile: 'player.html',
@@ -52,8 +52,10 @@ var http = require('http').Server(app);
 if (config.UseHTTPS) {
 	//HTTPS certificate details
 	const options = {
-		key: fs.readFileSync(path.join(__dirname, config.HTTPSKeyFile)),
-		cert: fs.readFileSync(path.join(__dirname, config.HTTPSCertFile))
+		//key: fs.readFileSync(path.join(__dirname, config.HTTPSKeyFile)),
+		//cert: fs.readFileSync(path.join(__dirname, config.HTTPSCertFile))
+		key: fs.readFileSync(config.HTTPSKeyFile),
+		cert: fs.readFileSync( config.HTTPSCertFile)
 	};
 
 	var https = require('https').Server(options, app);
