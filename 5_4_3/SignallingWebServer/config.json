@@ -1,33 +1,19 @@
 {
 	"UseFrontend": false,
 	"UseMatchmaker": false,
-	"UseHTTPS": false,
+	"UseHTTPS": true,
 	"LogToFile": true,
 	"LogVerbose": true,
 	"HomepageFile": "player.html",
 	"AdditionalRoutes": {},
-	"peerConnectionOptions": {  
-  "iceServers": [
-    {
-      "urls": [
-        "stun:us-turn1.xirsys.com"
-      ]
-    },
-    {
-      "username": "Q1NOdAU-CVk_-UKQd_1h9ErKFl0dVkL7Pb3Oo0SxOrD-PsQBOoXtcmklKbI36wCNAAAAAGahu4plYWdsZTNkc3RyZWFtaW5n",
-      "credential": "82b3fc6c-4a2f-11ef-9159-0242ac140004",
-      "urls": [
-        "turn:us-turn1.xirsys.com:80?transport=udp",
-        "turn:us-turn1.xirsys.com:3478?transport=udp",
-        "turn:us-turn1.xirsys.com:80?transport=tcp",
-        "turn:us-turn1.xirsys.com:3478?transport=tcp",
-        "turns:us-turn1.xirsys.com:443?transport=tcp",
-        "turns:us-turn1.xirsys.com:5349?transport=tcp"
-      ]
-    }
-  ]
-}
-,
+	
+	"peerConnectionOptions111": "{\"iceServers\":[{\"urls\":[\"stun:ss-turn1.xirsys.com\"]},{\"urls\":[\"turn:ss-turn1.xirsys.com:80?transport=udp\",\"turn:ss-turn1.xirsys.com:3478?transport=udp\",\"turn:ss-turn1.xirsys.com:80?transport=tcp\",\"turn:ss-turn1.xirsys.com:3478?transport=tcp\",\"turns:ss-turn1.xirsys.com:443?transport=tcp\",\"turns:ss-turn1.xirsys.com:5349?transport=tcp\"],\"username\":\"SJlRupVP-s5Yb4w9rCf2pIPOBkm6qW8bVcDd6CM3GUSZIZ3jCGmKqlXLmTI9KF63AAAAAGbE9wllYWdsZTNkc3RyZWFtaW5n\",\"credential\":\"8c99069a-5f2f-11ef-b8fd-0242ac140004\"}]}"
+	,
+
+	"peerConnectionOptions": "{ \"iceServers\": [{\"urls\": [\"stun:stun.l.google.com:19302\"]}] }"
+
+	,
+	
 	"EnableWebserver": true,
 	"MatchmakerAddress": "",
 	"MatchmakerPort": 9999,
