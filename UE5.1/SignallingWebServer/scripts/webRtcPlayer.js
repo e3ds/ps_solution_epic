@@ -144,6 +144,53 @@ function webRtcPlayer(parOptions) {
         })
         
 		
+		function restartICEWithoutTurn() 
+		{
+			
+			  if(self.pcClient){
+				console.log("Closing existing PeerConnection")
+				self.pcClient.close();
+				self.pcClient = null;
+			}
+			isIceRestart=true
+			 if (webRtcPlayerObj) {
+        console.log('Creating offer');
+        showTextOverlay('Starting connection to server, please wait');
+        webRtcPlayerObj.createOffer();
+    } else {
+        console.log('WebRTC player not setup, cannot create offer');
+        showTextOverlay('Unable to setup video');
+    }
+	
+	return
+		
+			// Create a new peer connection with restricted ICE transport policy (no TURN)
+			const peerConnection = new RTCPeerConnection({
+				iceTransportPolicy: 'all',  // You can also use 'relay' to force TURN-only
+				//self.cfg
+			});
+
+			self.pcClient=peerConnection
+			// Create an offer with iceRestart set to true
+			peerConnection.createOffer({ iceRestart: true }).then((offer) => 
+			{
+				return peerConnection.setLocalDescription(offer);
+				
+				
+			}).then(() => {
+				// Send the new offer to the remote peer
+				//sendOfferToRemotePeer(peerConnection.localDescription);
+				
+				 if (self.onWebRtcOffer) {
+						self.onWebRtcOffer(peerConnection.localDescription);
+					}
+			
+			}).catch((error) => {
+				console.error("Error during ICE restart:", error);
+			});
+		}
+
+
 		video.addEventListener('playing', (event) => 
 			{
 			  console.log('Video is no longer paused');
@@ -158,6 +205,12 @@ function webRtcPlayer(parOptions) {
 					}
 				});
 			});
+			
+			 setTimeout(function () {
+            restartICEWithoutTurn() 
+					}, 5 * 1000);
+		
+			 
 			});
 
 		
@@ -309,6 +362,9 @@ function webRtcPlayer(parOptions) {
     };
 
     handleCreateOffer = function (pc) {
+		
+		
+			self.sdpConstraints.iceRestart=isIceRestart
         pc.createOffer(self.sdpConstraints).then(function (offer) {
 
             // Munging is where we modifying the sdp string to set parameters that are not exposed to the browser's WebRTC API

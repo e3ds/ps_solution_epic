@@ -39,6 +39,7 @@ let rAF = window.mozRequestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     window.requestAnimationFrame;
 
+let isIceRestart = false;
 let webRtcPlayerObj = null;
 let print_stats = false;
 let print_inputs = false;
