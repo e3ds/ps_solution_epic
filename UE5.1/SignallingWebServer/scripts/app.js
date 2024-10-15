@@ -2640,6 +2640,30 @@ function connect() {
 
 // Config data received from WebRTC sender via the Cirrus web server
 function onConfig(config) {
+	
+	
+		
+	var xirsys_singapore_prod_fe = {
+																		  iceServers: [
+																			{ urls: ["stun:ss-turn1.xirsys.com"] },
+																			{
+																			  username:
+																				"PXh7Z7Y1Kx3BBELOcXItAqXiqJ-mjnaZ5CWGU6mLSeFjdUdewOq1wHrxm9pBvBErAAAAAGcNUwhlYWdsZTNkc3RyZWFtaW5n",
+																			  credential: "b619111c-8a50-11ef-af1b-0242ac140004",
+																			  urls: [
+																				"turn:ss-turn1.xirsys.com:80?transport=udp",
+																				"turn:ss-turn1.xirsys.com:3478?transport=udp",
+																				"turn:ss-turn1.xirsys.com:80?transport=tcp",
+																				"turn:ss-turn1.xirsys.com:3478?transport=tcp",
+																				"turns:ss-turn1.xirsys.com:443?transport=tcp",
+																				"turns:ss-turn1.xirsys.com:5349?transport=tcp",
+																			  ],
+																			},
+																		  ],
+																		};
+	
+	
+	config.peerConnectionOptions=xirsys_singapore_prod_fe
     let playerDiv = document.getElementById('player');
     let playerElement = setupWebRtcPlayer(playerDiv, config);
     resizePlayerStyle();
