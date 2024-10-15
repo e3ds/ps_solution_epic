@@ -1,5 +1,54 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+		function restartICEWithoutTurn() 
+		{
+			console.log(" 111111 restartICEWithoutTurn")
+			  if(self.pcClient){
+				console.log("Closing existing PeerConnection")
+				
+				self.pcClient.close();
+				self.pcClient = null;
+			}
+			isIceRestart=true
+			SkipXirsysCandidates=false
+			 if (webRtcPlayerObj) {
+        console.log('Creating offer');
+        showTextOverlay('Starting connection to server, please wait');
+        webRtcPlayerObj.createOffer();
+    } else {
+        console.log('WebRTC player not setup, cannot create offer');
+        showTextOverlay('Unable to setup video');
+    }
+	
+	return
+		
+			// Create a new peer connection with restricted ICE transport policy (no TURN)
+			const peerConnection = new RTCPeerConnection({
+				iceTransportPolicy: 'all',  // You can also use 'relay' to force TURN-only
+				//self.cfg
+			});
+
+			self.pcClient=peerConnection
+			// Create an offer with iceRestart set to true
+			peerConnection.createOffer({ iceRestart: true }).then((offer) => 
+			{
+				return peerConnection.setLocalDescription(offer);
+				
+				
+			}).then(() => {
+				// Send the new offer to the remote peer
+				//sendOfferToRemotePeer(peerConnection.localDescription);
+				
+				 if (self.onWebRtcOffer) {
+						self.onWebRtcOffer(peerConnection.localDescription);
+					}
+			
+			}).catch((error) => {
+				console.error("Error during ICE restart:", error);
+			});
+		}
+
+
 function webRtcPlayer(parOptions) {
     parOptions = typeof parOptions !== 'undefined' ? parOptions : {};
     
@@ -144,51 +193,7 @@ function webRtcPlayer(parOptions) {
         })
         
 		
-		function restartICEWithoutTurn() 
-		{
-			
-			  if(self.pcClient){
-				console.log("Closing existing PeerConnection")
-				self.pcClient.close();
-				self.pcClient = null;
-			}
-			isIceRestart=true
-			 if (webRtcPlayerObj) {
-        console.log('Creating offer');
-        showTextOverlay('Starting connection to server, please wait');
-        webRtcPlayerObj.createOffer();
-    } else {
-        console.log('WebRTC player not setup, cannot create offer');
-        showTextOverlay('Unable to setup video');
-    }
-	
-	return
-		
-			// Create a new peer connection with restricted ICE transport policy (no TURN)
-			const peerConnection = new RTCPeerConnection({
-				iceTransportPolicy: 'all',  // You can also use 'relay' to force TURN-only
-				//self.cfg
-			});
 
-			self.pcClient=peerConnection
-			// Create an offer with iceRestart set to true
-			peerConnection.createOffer({ iceRestart: true }).then((offer) => 
-			{
-				return peerConnection.setLocalDescription(offer);
-				
-				
-			}).then(() => {
-				// Send the new offer to the remote peer
-				//sendOfferToRemotePeer(peerConnection.localDescription);
-				
-				 if (self.onWebRtcOffer) {
-						self.onWebRtcOffer(peerConnection.localDescription);
-					}
-			
-			}).catch((error) => {
-				console.error("Error during ICE restart:", error);
-			});
-		}
 
 
 		video.addEventListener('playing', (event) => 
@@ -206,9 +211,9 @@ function webRtcPlayer(parOptions) {
 				});
 			});
 			
-			 setTimeout(function () {
+			/*  setTimeout(function () {
             restartICEWithoutTurn() 
-					}, 5 * 1000);
+					}, 5 * 1000); */
 		
 			 
 			});
@@ -254,8 +259,41 @@ function webRtcPlayer(parOptions) {
     };
 
     oniceconnectionstatechange = function(state) {
-        console.info('Browser ICE connection |', state.srcElement.iceConnectionState, '|')
+        console.info('111111  Browser ICE connection |', state.srcElement.iceConnectionState, '|')
+		
+		switch ( state.srcElement.iceConnectionState) 
+		{
+			case 'new':
+			  console.log('ICE connection state: New connection.');
+			  break;
+			case 'checking':
+			  console.log('ICE connection state: Checking connectivity.');
+			  break;
+			case 'connected':
+			case 'completed':
+				
+			  break;
+			case 'disconnected':
+			  console.log('ICE connection state: Disconnected from the remote peer.');
+			  restartICEWithoutTurn() 
+			
+			  break;
+			case 'failed':
+			  console.log('ICE connection state: Connection failed.');
+				
+			  break;
+			case 'closed':
+			  console.log('ICE connection state: Connection closed.');
+			  break;
+			default:
+			  console.log('Unknown ICE connection state.');
+			  break;
+		
+		}
     };
+	
+	
+	
 
     onicegatheringstatechange = function(state) {
         console.info('Browser ICE gathering |', state.srcElement.iceGatheringState, '|')
@@ -355,10 +393,25 @@ function webRtcPlayer(parOptions) {
 
     onicecandidate = function (e) {
         let candidate = e.candidate;
-        if (candidate && candidate.candidate) {
+        if (candidate && candidate.candidate) 
+		{
+			if(SkipXirsysCandidates == true)
+			{
+				const url = candidate.url; // IP address
+				if (url && url.includes('xirsys.com')) 
+													{
+													  console.log('Xirsys candidate discarded:', event.candidate);
+													  
+													  return
+													} 
+													
+			}
+													
+													
             console.log("%c[Browser ICE candidate]", "background: violet; color: black", "| Type=", candidate.type, "| Protocol=", candidate.protocol, "| Address=", candidate.address, "| Port=", candidate.port, "|");
             self.onWebRtcCandidate(candidate);
         }
+		
     };
 
     handleCreateOffer = function (pc) {
