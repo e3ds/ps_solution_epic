@@ -143,6 +143,24 @@ function webRtcPlayer(parOptions) {
             video.play();
         })
         
+		
+		video.addEventListener('playing', (event) => 
+			{
+			  console.log('Video is no longer paused');
+			  
+			 self.pcClient.getStats(null).then(stats => {
+				stats.forEach(report => {
+					// Look for the candidate-pair report
+					if (report.type === 'candidate-pair' && report.nominated) {
+						console.log('This is the nominated candidate pair being used:');
+						console.log(`Local Candidate: ${report.localCandidateId}`);
+						console.log(`Remote Candidate: ${report.remoteCandidateId}`);
+					}
+				});
+			});
+			});
+
+		
         // Check if request video frame callback is supported
         if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
             // The API is supported! 
