@@ -59,10 +59,10 @@ function set_start_default_values($SetTurnServerVar, $SetStunServerVar) {
  $global:cirruscmd = ""
 
  if ($SetTurnServerVar -eq "y") {
-  $global:TurnServer = $global:PublicIP + ":19303"
+  $global:TurnServer = $global:PublicIP + ":443"
  }
  if ($SetStunServerVar -eq "y") {
-  $global:StunServer = "stun.l.google.com:19302"
+  $global:StunServer = "stun.lxx.google.com:19302"
  }
 }
 
