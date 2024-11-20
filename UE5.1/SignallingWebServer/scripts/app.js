@@ -39,7 +39,6 @@ let rAF = window.mozRequestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     window.requestAnimationFrame;
 
-var SkipXirsysCandidates=true
 let isIceRestart = false;
 let webRtcPlayerObj = null;
 let print_stats = false;
