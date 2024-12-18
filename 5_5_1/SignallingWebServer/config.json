@@ -1,0 +1,58 @@
+{
+	"log_folder": "logs",
+	"log_level_console": "info",
+	"log_level_file": "info",
+	"streamer_port": "8888",
+	"player_port": "80",
+	"sfu_port": "8889",
+	"serve": true,
+	"http_root": "D:\\PixelStreamingInfrastructure\\SignallingWebServer\\www",
+	"homepage": "player.html",
+	"https": true,
+	"https_port": 443,
+	"ssl_key_path": "certificates/client-key.pem",
+	"ssl_cert_path": "certificates/client-cert.pem",
+	"https_redirect": true,
+	"rest_api": false,
+	"peer_options": "",
+	"log_config": true,
+	"stdin": false,
+	"console_messages": "verbose"
+	,"peer_options222": {
+					  "iceServers": [
+						{
+						  "urls": [
+							"stun:ss-turn1.xirsys.com"
+						  ]
+						},
+						{
+						  "urls": [
+							"turn:ss-turn1.xirsys.com:80?transport=udp",
+							"turn:ss-turn1.xirsys.com:3478?transport=udp",
+							"turn:ss-turn1.xirsys.com:80?transport=tcp",
+							"turn:ss-turn1.xirsys.com:3478?transport=tcp",
+							"turns:ss-turn1.xirsys.com:443?transport=tcp",
+							"turns:ss-turn1.xirsys.com:5349?transport=tcp"
+						  ],
+						  "username": "SJlRupVP-s5Yb4w9rCf2pIPOBkm6qW8bVcDd6CM3GUSZIZ3jCGmKqlXLmTI9KF63AAAAAGbE9wllYWdsZTNkc3RyZWFtaW5n",
+						  "credential": "8c99069a-5f2f-11ef-b8fd-0242ac140004"
+						}
+					  ]
+					}
+
+	
+
+	 
+	,"peer_options": {
+						  "iceServers": [
+							{
+							  "urls": [
+								"stun:stun.l.google.com:19302"
+							  ]
+							}
+						  ]
+						}
+
+
+	
+}
