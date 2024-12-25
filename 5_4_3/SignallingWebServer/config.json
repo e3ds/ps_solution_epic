@@ -1,6 +1,6 @@
 {
 	"UseFrontend": false,
-	"UseMatchmaker": false,
+	"UseMatchmaker": true,
 	"UseHTTPS": true,
 	"LogToFile": true,
 	"LogVerbose": true,
@@ -15,7 +15,7 @@
 	,
 	
 	"EnableWebserver": true,
-	"MatchmakerAddress": "",
+	"MatchmakerAddress": "172.7.191.90",
 	"MatchmakerPort": 9999,
 	"PublicIp": "localhost",
 	"HttpPort": 80,
