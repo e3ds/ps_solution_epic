@@ -146,6 +146,14 @@ if(enableRESTAPI) {
 		}
 	});
 }
+function generateUniqueId(prefix) {
+  // Generate a random 8-character hexadecimal string
+  const randomPart = Math.random().toString(16).substring(2, 10); 
+
+  // Combine the prefix with the random part
+  return `${prefix}-${randomPart}`;
+}
+
 
 if(enableRedirectionLinks) {
 	// Handle standard URL.
@@ -163,9 +171,34 @@ if(enableRedirectionLinks) {
 
 app.get('/', (req, res) => {
   cirrusServer = getAvailableCirrusServer();
-  if (cirrusServer != undefined) {
+  if (cirrusServer != undefined) 
+  {
+	  const myPrefix = ""; 
+	 const StreamerId = req.params.StreamerId; 
+	  if (StreamerId) 
+	  {
+		// User ID exists
+		console.log(`StreamerId: ${StreamerId}`);
+		myPrefix=StreamerId
+		// Process the request with the user ID
+		// ...
+	  } 
+  
+//https://mp1.eagle3dstreaming.com/?HoveringMouse=true&AutoPlayVideo=true&StreamerId=vr_ps_52 
+	  // Example usage:
+		
+		var uniqueId = generateUniqueId(myPrefix); 
+		console.log(uniqueId); // Output: myUniquePrefix-a74c35f2
+	  
+	  
     const fullUrl = new URL(req.originalUrl, `http://${req.headers.host}`); 
     const redirectUrl = new URL(fullUrl.pathname + fullUrl.search, `http://${cirrusServer.address}:${cirrusServer.port}`);
+	
+	
+	 redirectUrl.searchParams.append('uniqueId', uniqueId); // Add the uniqueId parameter
+
+
+
     res.redirect(redirectUrl.toString()); 
     console.log(`Redirect to ${redirectUrl.toString()}`);
   } else {
