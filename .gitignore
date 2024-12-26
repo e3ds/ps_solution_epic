@@ -65,3 +65,4 @@ EL/.env
 /5_4_3/SignallingWebServer/platform_scripts/cmd/node/node_modules/npm/node_modules
 /5_4_3/SignallingWebServer/platform_scripts/cmd/node/node_modules
 /5_4_3/SignallingWebServer/platform_scripts/cmd/node
+/5_4_3/Matchmaker/platform_scripts/cmd/node
