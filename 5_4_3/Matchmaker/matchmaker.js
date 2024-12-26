@@ -149,7 +149,7 @@ if(enableRESTAPI) {
 
 if(enableRedirectionLinks) {
 	// Handle standard URL.
-	app.get('/', (req, res) => {
+	/* app.get('/', (req, res) => {
 		cirrusServer = getAvailableCirrusServer();
 		if (cirrusServer != undefined) {
 			res.redirect(`http://${cirrusServer.address}:${cirrusServer.port}/`);
@@ -158,7 +158,20 @@ if(enableRedirectionLinks) {
 		} else {
 			sendRetryResponse(res);
 		}
-	});
+	}); */
+
+
+app.get('/', (req, res) => {
+  cirrusServer = getAvailableCirrusServer();
+  if (cirrusServer != undefined) {
+    const fullUrl = new URL(req.originalUrl, `http://${req.headers.host}`); 
+    const redirectUrl = new URL(fullUrl.pathname + fullUrl.search, `http://${cirrusServer.address}:${cirrusServer.port}`);
+    res.redirect(redirectUrl.toString()); 
+    console.log(`Redirect to ${redirectUrl.toString()}`);
+  } else {
+    sendRetryResponse(res);
+  }
+});
 
 	// Handle URL with custom HTML.
 	app.get('/custom_html/:htmlFilename', (req, res) => {
