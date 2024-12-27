@@ -168,8 +168,91 @@ if(enableRedirectionLinks) {
 		}
 	}); */
 
+const axios = require('axios');
 
-app.get('/', (req, res) => {
+async function getIPDetails(ipAddress) {
+  try {
+    const apiKey = '667cb95019b04ea5beaa7c935dc5ce37'; // Replace with your actual API key
+    const apiUrl = `https://ipgeolocation.abstractapi.com/v1/?api_key=${apiKey}&ip=${ipAddress}`;
+
+    const response = await axios.get(apiUrl);
+    const ipDetails = await response.data; // Wait for data to be available
+
+    return ipDetails; 
+  } catch (error) {
+    console.error('Error fetching IP details:', error);
+    return null; 
+  }
+}
+
+
+app.get('/', async(req, res) => {
+	
+	 var clientIp = req.ip; 
+
+
+ // Check if the IP address is IPv4-mapped IPv6
+  if (clientIp.startsWith('::ffff:')) {
+    clientIp = clientIp.substring(7); // Extract the IPv4 address
+  }
+  
+  console.log(`Client IP Address: ${clientIp}`); 
+  //res.send(`Your IP address is: ${clientIp}`);
+  
+  const ipDetails = await getIPDetails(clientIp);
+
+/* 
+{
+  ip_address: '172.7.191.90',
+  city: 'Midland',
+  city_geoname_id: 5526337,
+  region: 'Texas',
+  region_iso_code: 'TX',
+  region_geoname_id: 4736286,
+  postal_code: '79701',
+  country: 'United States',
+  country_code: 'US',
+  country_geoname_id: 6252001,
+  country_is_eu: false,
+  continent: 'North America',
+  continent_code: 'NA',
+  continent_geoname_id: 6255149,
+  longitude: -102.0651,
+  latitude: 31.9919,
+  security: { is_vpn: false },
+  timezone: {
+    name: 'America/Chicago',
+    abbreviation: 'CST',
+    gmt_offset: -6,
+    current_time: '19:03:22',
+    is_dst: false
+  },
+  flag: {
+    emoji: '🇺🇸'  ,
+    unicode: 'U+1F1FA U+1F1F8',
+    png: 'https://static.abstractapi.com/country-flags/US_flag.png',
+    svg: 'https://static.abstractapi.com/country-flags/US_flag.svg'
+  },
+  currency: { currency_name: 'USD', currency_code: 'USD' },
+  connection: {
+    autonomous_system_number: 7018,
+    autonomous_system_organization: 'ATT-INTERNET4',
+    connection_type: null,
+    isp_name: null,
+    organization_name: null
+  }
+} */
+
+  if (ipDetails) {
+    //console.dir(ipDetails); 
+    console.dir(ipDetails.longitude); 
+    console.dir(ipDetails.latitude); 
+  } else {
+    console.error('Failed to retrieve IP details.');
+  }
+  
+  
+  
   cirrusServer = getAvailableCirrusServer();
   if (cirrusServer != undefined) 
   {
@@ -749,3 +832,143 @@ function startio_exeluncher() {
 
 
 startio_exeluncher()
+
+
+/////////
+
+function sendExeluncherLunchAppCmd(ws)//isAppPreAllocateCmd=false) 
+{
+	console.trace()
+	if(ws)
+		sendIncludeInTimeRecordsOnlyToThisPlayer(ws,"sendExeluncherLunchAppCmdCalledAt",Date.now())
+		
+
+	console.logColor(logging.Blue, "sendExeluncherLunchAppCmd()  "); 
+	
+	console.logColor(    logging.Red,    "yyyyy 5555 serverOwner :" + serverOwner ) ;
+ 
+ 
+	 console.log(" sendExeluncherLunchAppCmd()" );
+	   console.logColor(logging.Blue, "444444 serverOwner = " + serverOwner);
+  if (streamer !== undefined) 
+  {
+	var msfsfsg=	"sendExeluncherLunchAppCmd() found streamer alreday connected "
+	msfsfsg=
+	msfsfsg
+	+" lastRequestToCloseExefor.appName: "
+	+lastRequestToCloseExefor.appName
+	+" lastRequestToCloseExefor.serverOwner: "
+	+lastRequestToCloseExefor.serverOwner
+	+ " requested: "+appName
+	
+	if(owner)
+		msfsfsg=msfsfsg+ " owner: "+owner
+	
+		postToTelegram2(msfsfsg,-811123300)  
+   console.log("sendExeluncherLunchAppCmd to  exeluncher skipped as a streamer already connected.  ");
+    return;
+  }
+ 
+	  
+	  
+  
+  
+  if(version === undefined)
+	  version=-1
+  
+
+  if (appName === undefined 
+  || version === undefined
+  || configuration === undefined
+  
+  ) 
+  {
+	  
+	if(elInfo.preAllocateApps)
+	{
+		appName =elInfo.preAllocateApp_name
+		 console.log("yyyyyyyyy 3");
+		serverOwner =elInfo.preAllocateApp_owner
+		configurationName =elInfo.preAllocateApp_configurationName
+		
+		if ( //!isAppPreAllocateCmd  && 
+		(configuration === undefined) )
+		{
+			console.logColor(logging.Red, " !!!!!!!!!!!sendExeluncherLunchAppCmd(): configuration undefined.  ");
+			getConfigurationFromFB() 
+			return
+		} 
+	
+		configuration =configuration
+		version="-1"
+		
+
+	} 
+	else
+	{
+		console.log(
+		  "appName || version  || configuration  undefined .So skipping sendExeluncherLunchAppCmd"
+		);
+		 return;
+     }
+    }
+	
+	
+	  
+    console.logColor(logging.Blue, "yyyyy 111 serverOwner = " + serverOwner);
+console.logColor(logging.Blue, "appName = " + appName);
+console.logColor(logging.Blue, "version = " + version);
+console.logColor(logging.Blue, "configuration = " + configuration);
+	
+    if ( //!isAppPreAllocateCmd  && 
+	(configuration === undefined) )
+	{
+		console.logColor(logging.Red, " !!!!!!!!!!!sendExeluncherLunchAppCmd(): configuration undefined.  ");
+		
+		return
+	} 
+	
+
+  var data = {
+    appName: appName, //"DHP_Config_Desktop"
+    version: version, //"DHP_Config_Desktop"
+    SSAddress: serverPublicIp,
+    ue4StreamerToSS: streamerPort,
+    configuration: configuration,
+    owner: serverOwner,
+   
+    appDownloadInfo: appDownloadInfo,
+    uInfo: uInfo,
+  };
+
+	if(ws &&   ws.userDeviceInfo)
+		data.userDeviceInfo=ws.userDeviceInfo
+	else
+		data.userDeviceInfo=userDeviceInfo
+ 
+  //console.log(" exeluncher- lunchApp :" + JSON.stringify(data));
+	console.logColor(    logging.Blue,   "configuration :" + JSON.stringify(configuration));
+	console.logColor(    logging.Red,    "exeluncher- lunchApp :" 
+	//+ JSON.stringify(data) 
+	) ;
+ 
+ 
+  if (exeluncher === undefined) 
+  {
+    sendMsgToAllConnectedPlayer(
+      " !!!!!!!!!!!exeluncher undefined for  " + JSON.stringify(data)
+    );
+  } 
+  else 
+  {
+	    console.logColor(    logging.Red,    "yyyyy2222 serverOwner :" + serverOwner ) ;
+	 console.logColor(    logging.Red," sendExeluncherLunchAppCmd() ss-> exeluncher lunchApp :" 
+	 //+ JSON.stringify(data)
+	 );
+	
+	 if(ws)
+		 sendIncludeInTimeRecordsOnlyToThisPlayer(ws,"lunchAppCmdSentToELAt",Date.now())
+	  exeluncher.emit("lunchApp", data);
+	  
+  }
+} 
