@@ -319,9 +319,37 @@ app.post('/startStreamingAppLunchingProcess', (req, res) => {
   console.log('Received data:', data); 
  //console.dir(data); 
   //console.dir(data); 
+  
+/*   {  StreamerId: 'vr_ps_52',
+  AutoConnect: 'true',
+  AutoPlayVideo: 'true',
+  HoveringMouse: 'true',
+  StartVideoMuted: 'true',
+  owner: 'demo',
+  app: 'vr_ps_52'
+} */
+var uniqueId = generateUniqueId(data.owner+"_"+data.app); 
+		console.log(uniqueId); // Output: myUniquePrefix-a74c35f2
+	data.uid=uniqueId
+	data.appName=data.app
+	data.version=1//data.version
+if(exelunchers.length>0)	
+{ 
+	exelunchers[0].emit("startStreamingAppLunchingProcess", data);
+	   // Send a response (e.g., acknowledge receipt)
+  res.status(200).json( { uid: uniqueId } );
+}
+else
+{
+	 res.status(200).json( { exelunchers_length: exelunchers.length } );
+}
 
-  // Send a response (e.g., acknowledge receipt)
-  res.status(200).json({ message: 'Data received successfully' }); 
+
+	
+	
+		
+		
+
 });
 	
 //
@@ -504,7 +532,7 @@ function startio_exeluncher() {
       ", total: " +
       exelunchers.length
     );
-    //exelunchers.push(socket)
+    exelunchers.push(socket)
     socket.send(
       "you are conneted to MMLineker.js   as exeluncher id:" +
       util.inspect(socket.id)
@@ -700,7 +728,7 @@ function startio_exeluncher() {
   
     socket.on("disconnect", function (reason)
     {
-      /* var i=0
+       var i=0
 																 exelunchers.forEach(function(c){
 
 																	if(c.id == socket.id)
@@ -708,7 +736,7 @@ function startio_exeluncher() {
 
 																	i++
 
-																}); */
+																}); 
 
       console.log(
         "exeluncher disconnected " +
