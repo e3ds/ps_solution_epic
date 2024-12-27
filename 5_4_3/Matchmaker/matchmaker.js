@@ -174,7 +174,7 @@ async function getIPDetails(ipAddress) {
   try {
     const apiKey = '667cb95019b04ea5beaa7c935dc5ce37'; // Replace with your actual API key
     const apiUrl = `https://ipgeolocation.abstractapi.com/v1/?api_key=${apiKey}&ip=${ipAddress}`;
-
+//url = "https://ipgeolocation.abstractapi.com/v1/?api_key=667cb95019b04ea5beaa7c935dc5ce37"
     const response = await axios.get(apiUrl);
     const ipDetails = await response.data; // Wait for data to be available
 
@@ -324,9 +324,12 @@ const matchmaker = net.createServer((connection) => {
 			disconnect(connection);
 			return;
 		}
-		if (message.type === 'connect') {
+		if (message.type === 'connect') 
+		{
+			console.dir(message)
 			// A Cirrus server connects to this Matchmaker server.
 			cirrusServer = {
+				detailsFromSS: message,
 				address: message.address,
 				port: message.port,
 				numConnectedClients: 0,
