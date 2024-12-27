@@ -547,7 +547,7 @@ function registerStreamer(id, streamer) {
 	}
 	streamers.set(uniqueId, streamer);
 	console.logColor(logging.Green, `Registered new streamer: ${streamer.id}`);
-	console.dir(streamer)
+	//console.dir(streamer)
 }
 
 function onStreamerDisconnected(streamer) {
