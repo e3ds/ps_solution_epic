@@ -547,6 +547,7 @@ function registerStreamer(id, streamer) {
 	}
 	streamers.set(uniqueId, streamer);
 	console.logColor(logging.Green, `Registered new streamer: ${streamer.id}`);
+	console.dir(streamer)
 }
 
 function onStreamerDisconnected(streamer) {
@@ -995,10 +996,31 @@ function disconnectAllPlayers(streamerId) {
  * Function that handles the connection to the matchmaker.
  */
 
+
+const axios = require('axios');
+
+async function getIPDetails(ipAddress) {
+  try {
+    const apiKey = '667cb95019b04ea5beaa7c935dc5ce37'; // Replace with your actual API key
+   
+	const apiUrl =  "https://ipgeolocation.abstractapi.com/v1/?api_key=667cb95019b04ea5beaa7c935dc5ce37";
+
+    const response = await axios.get(apiUrl);
+    const ipDetails = await response.data; // Wait for data to be available
+
+    return ipDetails; 
+  } catch (error) {
+    console.error('Error fetching IP details:', error);
+    return null; 
+  }
+}
+
+ var ipDetails=undefined
+
 if (config.UseMatchmaker) {
 	var matchmaker = new net.Socket();
 
-	matchmaker.on('connect', function() {
+	matchmaker.on('connect', async function() {
 		console.log(`Cirrus connected to Matchmaker ${matchmakerAddress}:${matchmakerPort}`);
 
 		// message.playerConnected is a new variable sent from the SS to help track whether or not a player 
@@ -1011,12 +1033,14 @@ if (config.UseMatchmaker) {
 			playerConnected = true;
 		}
 
+	ipDetails = await getIPDetails();
 		// Add the new playerConnected flag to the message body to the MM
 		message = {
 			type: 'connect',
 			address: typeof serverPublicIp === 'undefined' ? '127.0.0.1' : serverPublicIp,
 			port: config.UseHTTPS ? httpsPort : httpPort,
 			ready: streamers.size > 0,
+			ipDetails: ipDetails,
 			playerConnected: playerConnected
 		};
 
