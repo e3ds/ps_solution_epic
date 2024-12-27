@@ -347,3 +347,405 @@ const matchmaker = net.createServer((connection) => {
 matchmaker.listen(config.MatchmakerPort, () => {
 	console.log('Matchmaker listening on *:' + config.MatchmakerPort);
 });
+
+
+
+
+
+//******************************************************************exeluncher
+/* 
+
+const socketio = require('socket.io');
+
+
+const server = require('http').createServer(app);
+const io = socketio(server);
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  socket.on('message', (msg) => {
+    console.log('Message from client:', msg);
+    io.emit('broadcast', msg); // Broadcast to all connected clients
+  });
+
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
+});
+
+server.listen(3000, () => {
+  console.log('Server listening on port 3000');
+});
+
+ */
+///////////////////////exeluncher
+var exeluncherPort=4567
+var exelunchers = [];
+var app_exeluncher = require("express")();
+var http_exeluncher = require("http").Server(app_exeluncher);
+var io_exeluncher = require("socket.io")(http_exeluncher);
+var util = require("util");
+function startio_exeluncher() {
+  io_exeluncher.on("connection", function (socket)
+  {
+    console.log(
+      "exeluncher connected id:" +
+      util.inspect(socket.id) +
+      ", total: " +
+      exelunchers.length
+    );
+    //exelunchers.push(socket)
+    socket.send(
+      "you are conneted to MMLineker.js   as exeluncher id:" +
+      util.inspect(socket.id)
+    );
+
+    //////////////////////////////upload
+    
+    socket.on("sendmeafile", function (data)
+    {
+		const ss = require("socket.io-stream");
+      // data-->	appName: appName //"DHP_Config_Desktop"
+      // ,version: version //"DHP_Config_Desktop"
+      // ,SSAddress: serverPublicIp
+      // ,ue4StreamerToSS: streamerPort
+
+      console.log(
+        "11111111111111 Exeluncher--> MMLineker sendmeafile " +
+        JSON.stringify(data)
+      );
+
+      //file
+
+      var filePath =
+        exeDirectory + "\\" + data.owner + "\\" + data.appName + "\\";
+      var filename = data.version + ".zip"; //'macthMakerNormal.7z';
+
+      var fullFilePath = filePath + filename;
+
+      console.log("searching for:" + fullFilePath);
+
+      if (!fs.existsSync(fullFilePath))
+      {
+        console.log("FileDoesNotExist :" + fullFilePath);
+        console.log(
+          "11111111111111 MMLineker-->Exeluncher FileDoesNotExist " +
+          JSON.stringify(data)
+        );
+
+        socket.emit("FileDoesNotExist", data);
+        return;
+      }
+      console.log(
+        "path.basename(path.dirname(filename)) : " +
+        path.basename(path.dirname(fullFilePath))
+      );
+      console.log("sendmeafile : " + fullFilePath);
+
+      var stats = fs.statSync(fullFilePath);
+      var fileSizeInBytes = stats["size"];
+
+      //console.log('111111111111 stats["size"]: '+stats["size"]);
+      //console.log('111111111111 stats.size: '+stats.size);
+
+      var zipSize = stats.size;
+      var uploadedSize = 0;
+
+      //fs to read file
+      var zipReadStream = fs.createReadStream(fullFilePath);
+
+      zipReadStream.on("data", function (buffer)
+      {
+        var segmentLength = buffer.length;
+
+        // Increment the uploaded data counter
+        uploadedSize += segmentLength;
+
+        // Display the upload percentage
+
+        var ttt = ((uploadedSize / zipSize) * 100).toFixed(2) + "%";
+        //console.log("Progress:\t",ttt);
+        process.stdout.write("uploaded " + ttt + " \r");
+      });
+
+      // Some other events you might want for your code
+      zipReadStream.on("end", function ()
+      {
+        console.log("zipReadStream : end");
+      });
+      zipReadStream.on("close", function ()
+      {
+        console.log("zipReadStream : close");
+      });
+
+      //socket.io-stream
+      var stream = ss.createStream(); //createStream() returns a new stream which can be sent by emit().
+
+      stream.on("end", function ()
+      {
+        console.log("111111111111socket.io-stream: stream end");
+      });
+      ss(socket).emit("sending", stream, {
+        filename: filename,
+        fileSize: zipSize,
+        parentFolder: path.basename(path.dirname(fullFilePath)),
+        AppInfoRequested2Linker: data,
+      });
+
+      //combine operation
+
+      zipReadStream.pipe(stream);
+
+      /*
+															//Upload progress
+															var blobStream = ss.createBlobReadStream(filePath+filename);//createStream() returns a new stream which can be sent by emit().
+
+															blobStream.on('end', function ()
+																				{
+																					console.log('111111111111 blobStream file sent');
+																				}
+																	  );
+
+
+															var size = 0;
+
+
+															blobStream.on('data', function(chunk)
+																					{
+																						size += chunk.length;
+																						console.log(Math.floor(size / file.size * 100) + '%');
+																						// -> e.g. '42%'
+																					}
+																		 );
+															blobStream.pipe(stream); */
+    });
+
+    //////////////////////////////upload
+
+    socket.on("sendMMlinkerInfo", function (obj)
+    {
+		//if(obj.el_version== config.el_version)
+			//socket.emit("taskeMMlinkerInfo", MMLinkerInfo);
+		//else
+		//	socket.emit("secretKeyMismatched");
+    });
+
+    socket.on("sendSslunchersList", function ()
+    {
+      //console.logColor(logging.Blue,"Exeluncher--> MMLineker sendSslunchersList ");
+
+     return
+
+      // console.log(sslunchers  );
+      var temp = [];
+      var toremove = [];
+      for (i = 0; i < sslunchers.length; i++)
+      {
+        var entry = sslunchers[i];
+
+        if (
+          entry.socket !== undefined && //checking if by any chance if this ssluncher is dead one and somehow wasskipped removeFromArray
+          entry.socket.connected &&
+          !entry.socket.disconnected
+        )
+        {
+          var tt = {
+            ssluncher_ip: entry.ssluncher_ip,
+            exeluncherPort: entry.exeluncherPort,
+            SSNum: entry.SSNum,
+            queue: entry.queue
+          };
+          temp.push(tt);
+        }
+        else
+        {
+          console.log(
+            "sendSslunchersList: found an dead ssluncher: " +
+            entry.ssluncher_ip +
+            ":" +
+            entry.exeluncherPort +
+            " , id: " +
+            entry.socket.id
+          );
+          //2do-should we rrmoave this from list. or keep it for futurte tarcking purpose to find out why they skippedin removeFromArray
+		  toremove.push(i);
+		   
+        }
+      }
+
+	for (i = 0; i < toremove.length; i++)
+      {
+		sslunchers.splice(toremove[i], 1);
+	  }
+
+      //console.log(temp  );
+
+      //socket.emit("taskeSSLuncherArray",sslunchers);
+      socket.emit("taskeSSLuncherArray", temp);
+	  // console.log("MMLineker--> Exeluncher taskeSSLuncherArray "+JSON.stringify(temp));
+    });
+
+
+
+  
+    socket.on("disconnect", function (reason)
+    {
+      /* var i=0
+																 exelunchers.forEach(function(c){
+
+																	if(c.id == socket.id)
+																		exelunchers.splice(i,1)
+
+																	i++
+
+																}); */
+
+      console.log(
+        "exeluncher disconnected " +
+        util.inspect(socket.id) +
+        ", exelunchers.length: " +
+        exelunchers.length
+      );
+      console.log("io_exeluncher: disconnect reason: " + reason);
+    });
+
+    //????????????????????????????????????????????????????
+    socket.on("error", (error) =>
+    {
+      console.log("io_exeluncher reconnect_error : ", error);
+    });
+
+    socket.on("connect", () =>
+    {
+      console.log(
+        "---------------io_exeluncher connect 22222222222222222222do"
+      );
+    });
+
+    socket.on("connect_timeout", (timeout) =>
+    {
+      console.log("io_exeluncher connect_timeout: " + timeout);
+    });
+
+    socket.on("connect_error", (error) =>
+    {
+      console.log("io_exeluncher connect_error: ", error);
+    });
+
+    //Fired upon a successful reconnection.
+    socket.on("reconnect", (attemptNumber) =>
+    {
+      console.log("io_exeluncher reconnect attemptNumber: " + attemptNumber);
+    });
+
+    socket.on("reconnect_attempt", (attemptNumber) =>
+    {
+      console.log(
+        "io_exeluncher reconnect_attempt attemptNumber: " + attemptNumber
+      );
+    });
+
+    socket.on("reconnecting", (attemptNumber) =>
+    {
+      console.log("io_exeluncher reconnecting attemptNumber: " + attemptNumber);
+    });
+
+    socket.on("reconnect_error", (error) =>
+    {
+      console.log("io_exeluncher reconnect_error : ", error);
+    });
+
+    socket.on("reconnect_failed", () =>
+    {
+      console.log("io_exeluncher reconnect_failed  ");
+    });
+
+
+ socket.on('ping4MMLineker', () => {
+    console.log('Received ping4MMLineker from client');
+    socket.emit('pong4MMLineker');
+  });
+  
+    socket.on("ping", () =>
+    {
+      console.log("io_exeluncher ping ");
+    });
+
+    socket.on("pong", (latency) =>
+    {
+      console.log("io_exeluncher pong latency: ", latency);
+    });
+
+    socket.on("isCcuLimitExceeded", async (obj)=>{
+      const responseEvent = `isCcuLimitExceededResponse`;
+      if(obj && obj.owner && obj.owner.length){
+        const config = {
+          method: 'get',
+          url: `https://controlpanel.eagle3dstreaming.com/${obj.owner}/getUsersinfo`
+        }
+        try{
+          let response = await axios(config);
+          response = response.data;
+          const maxCcuLimit = response.maxUserLimit;
+          if(!maxCcuLimit || maxCcuLimit == undefined || maxCcuLimit <= 0){
+            return socket.emit(responseEvent, {error: `Failed to fetch maxUserLimit for user ${obj.owner}`, meta: {maxCcuLimit}});
+          }
+
+          let i = 0;
+          while(!cirrusServers_io.size && !cirrusServers.size && i<10){
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            i++;
+          }
+          //START
+          console.log(cirrusServers_io.size)
+          console.log(cirrusServers.size)
+
+          if (matchmakerType == 2) 
+		        cirrusServersT = cirrusServers_io;
+          else 
+		        cirrusServersT = cirrusServers;
+
+          console.logColor(logging.White, "isCcuLimitExceeded")
+          console.log(JSON.stringify(cirrusServersT.size));
+
+          let count = 0;
+          for (const cirrusServer223 of cirrusServersT.values()){
+            if (cirrusServer223.owner == obj.owner ||cirrusServer223.temp_OwnerOfLastAssignedPlayer == obj.owner || (cirrusServer223.elInfo && cirrusServer223.elInfo.preAllocateApp_owner == obj.owner))
+              count++;
+              console.log("count-->")
+              console.log(count)
+              console.log(JSON.stringify(cirrusServer223))
+          }
+    
+          if (count >= maxCcuLimit){
+            return socket.emit(responseEvent, {data: {status: true, count: {count, maxCcuLimit}}});
+          } else {
+            return socket.emit(responseEvent, {data: {status: false, count: {count, maxCcuLimit}}});
+	        }
+          //END
+        }catch(err){
+          return socket.emit(responseEvent, {error: `Critical error in fetching maxUserLimit for user ${obj.owner}`, meta: {object: err, string: err.toString(), stringified: JSON.stringify(err)}});
+        }
+        
+      }
+		//if(obj.el_version== config.el_version)
+			socket.emit("taskeMMlinkerInfo", MMLinkerInfo);
+		//else
+		//	socket.emit("secretKeyMismatched");
+    });
+
+    //????????????????????????????????????????????????????
+  });
+
+  http_exeluncher.listen(exeluncherPort, function ()
+  {
+    console.logColor(
+      logging.Red,
+      " listening on *:" + exeluncherPort + " for exeLuncher"
+    );
+  });
+}
+
+
+startio_exeluncher()
