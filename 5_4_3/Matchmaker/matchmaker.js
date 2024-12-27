@@ -301,6 +301,29 @@ app.get('/', async(req, res) => {
 	});
 }
 
+
+ // Use express.json() middleware to parse JSON request bodies
+app.use(express.json());
+	
+app.post('/startStreamingAppLunchingProcess', (req, res) => {
+ 
+ 
+
+ //console.log('Request received:', req.headers); // Log headers for debugging
+ // console.log('Request body:', req.body); // Log body for debugging
+
+
+ const data = req.body; 
+
+  // Process the received data
+  console.log('Received data:', data); 
+ //console.dir(data); 
+  //console.dir(data); 
+
+  // Send a response (e.g., acknowledge receipt)
+  res.status(200).json({ message: 'Data received successfully' }); 
+});
+	
 //
 // Connection to Cirrus.
 //
