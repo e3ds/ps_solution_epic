@@ -1,8 +1,8 @@
 var timeRecords = {};
 var ss_list = [
 		{
-			"ss_url": "asia1.eagle3dstreaming.com:4430",
-			//"ss_url": "usa_mp1.eagle3dstreaming.com:4430",
+			//"ss_url": "asia1.eagle3dstreaming.com:4430",
+			"ss_url": "usa_mp1.eagle3dstreaming.com:4430",
 			"latitude": 32.01,
 			"longitude": -102.11,
 		},
