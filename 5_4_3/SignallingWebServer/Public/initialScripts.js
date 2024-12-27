@@ -100,7 +100,7 @@ function e3ds_onLoad()
 																						
 																			
 																				var sfsgsg="video stream took:"+ fsfsf + " sec.  Url: "+ window.location.href
-																				
+																				sfsgsg=sfsgsg+ JSON.stringify(geoInfo, null, 2)
 																				postToTelegram(sfsgsg,-4659092962  )
 																	  
 																	}

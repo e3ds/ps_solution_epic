@@ -8,7 +8,7 @@ pushd "%~dp0"
 title Matchmaker
 
 @Rem Run setup to ensure we have node and matchmaker installed.
-call setup.bat
+::call setup.bat
 
 @Rem Move to matchmaker.js directory.
 pushd ..\..
