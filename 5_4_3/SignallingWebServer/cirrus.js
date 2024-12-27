@@ -211,10 +211,47 @@ try {
 	console.error(`reading config.AdditionalRoutes: ${err}`)
 }
 
+
+function askTostartStreamingAppLunchingProcess(dataToSend) {
+	
+	var url="https://"+config.MatchmakerAddress + ":"+config.MatchmakerPort+"/startStreamingAppLunchingProcess"
+	 console.log('askTostartStreamingAppLunchingProcess url:'+url); 
+	 console.dir(dataToSend); 
+  axios.post(url, dataToSend)
+    .then(response => {
+      console.log('Data sent successfully:', response.data); 
+    })
+    .catch(error => {
+      console.error('trying again , bcz Error sending data:', error);
+	  
+	  askTostartStreamingAppLunchingProcess(dataToSend)
+    });
+}
+
+
+
 if(config.EnableWebserver) {
 
 	// Request has been sent to site root, send the homepage file
 	app.get('/', function (req, res) {
+		
+		
+		const queryParams = {};
+
+		  // Iterate through query parameters
+		  for (const [key, value] of Object.entries(req.query)) {
+			queryParams[key] = value;
+		  }
+
+		console.dir(queryParams)
+		
+		
+		//https://connector_ms6.eagle3dstreaming.com/v5/demo/VR_AChristmasCarol/0
+		
+		//matchmaker.write(JSON.stringify(message));
+		
+		askTostartStreamingAppLunchingProcess(queryParams)
+		
 		homepageFile = (typeof config.HomepageFile != 'undefined' && config.HomepageFile != '') ? config.HomepageFile.toString() : defaultConfig.HomepageFile;
 		
 		let pathsToTry = [ path.join(__dirname, homepageFile), path.join(__dirname, '/Public', homepageFile), path.join(__dirname, '/custom_html', homepageFile), homepageFile ];
