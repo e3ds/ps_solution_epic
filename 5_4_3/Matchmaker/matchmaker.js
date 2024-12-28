@@ -301,6 +301,151 @@ app.get('/', async(req, res) => {
 	});
 }
 
+const axios = require("axios");
+const https233333 = require("https");
+const axiosInst = axios.create({
+  httpsAgent: new https233333.Agent({
+    rejectUnauthorized: false,
+  }),
+});
+
+async function getDownloadLinkForUploader4ToUSeBeforeQueue(data,res111) 
+{
+
+	
+			AppDataProvidedBySS=data
+			msg=data
+			
+			
+				var url=  
+				"https://upload-api.eagle3dstreaming.com/api/v1/files/coreweave"
+				 
+				  +"/streamingapp/"
+				
+				  +msg.owner
+				  +"/"
+				  +msg.appName
+				 // +"&region="
+				 // +GcsRegion.regionCode
+				 // +"&direct="+false
+				// +"&flexible="+true 
+				+"/download/"
+			
+	if
+	(
+	(AppDataProvidedBySS.version == -1)
+	||
+	(AppDataProvidedBySS.version == undefined)
+	)
+	{
+				  url=  url+"latest"
+				  
+				  
+	}
+			  else
+			  {
+				 url=  url+AppDataProvidedBySS.version
+				 
+			  }
+			 
+		console.log("---------url111 : " + url);
+  	 
+    return new Promise((resolve)=>{
+
+      axiosInst
+      .get(url)
+      .then(async (res) => 
+	  {
+		  //  console.logColor(logging.Blue,"--------------getAppListOfFromGCS: "  +" . axiosInst data:" +JSON.stringify(res));
+		  console.logColor(logging.Blue,"111--------------getAppListOfFromGCS: "  +" . axiosInst data:" +JSON.stringify(res.data));
+		  //res.data  :   {"status":"success","data":{"url":"https://e3dssp1.blob.core.windows.net/universal-upload-system-nodejs-ron/demo/ps501/1.zip"}}
+		
+		if(res.data.status=="error")
+		{
+			//:{"status":"error","message":"Not Found"}
+			if(res.data.message=="Not Found")
+			{
+				var messageToSend="showPageWIthMsg: "+AppDataProvidedBySS.owner+"/"+AppDataProvidedBySS.appName + " does not exist"
+				 messageToSend=AppDataProvidedBySS.owner+"/"+AppDataProvidedBySS.appName + " does not exist"
+				
+								
+				
+			}
+			
+			 console.log(res.data.message);
+			
+		
+			
+			
+			 console.log(res.data.stack);
+			
+
+      
+	   return resolve(false)	
+		}
+		else
+		{
+		 
+		 
+		  
+			
+			var url=res.data.data.url//azure storage
+			
+			console.log("---------url2222 : " + url);
+				//console.dir(ws.appDownloadInfo)
+				//console.dir(AppDataProvidedBySS)
+			//--------------getAppListOfFromGCS:  . axiosInst data:{"status":"success","data":{"url":"https://e3dssp1.blob.core.windows.net/universal-upload-system-nodejs-ron/demo/AAA/1.zip"}}
+			//var version222=path.parse(res.data.data.fileInfo.name).name
+			var version222=path.parse(res.data.data.filename).name
+			//var version222=path.parse(url).name
+			console.log("---------version222 : " + version222);
+			data.appDownloadInfo=res.data.data
+			data.version=version222
+			
+			
+			
+			if(exelunchers.length>0)	
+			{ 
+			console.log("---------startStreamingAppLunchingProcess : " + JSON.stringify(data));
+				exelunchers[0].emit("startStreamingAppLunchingProcess", data);
+				   // Send a response (e.g., acknowledge receipt)
+			  res111.status(200).json( { uid: data.uid } );
+			}
+			else
+			{
+				 res111.status(200).json( { exelunchers_length: exelunchers.length } );
+			}
+			
+			 
+		
+							
+                    return resolve(true)	
+		}
+      })
+      .catch((err) => 
+	  {
+		  
+		  var fssgf="getDownloadLinkForUploader4ToUSeBeforeQueue() uploader4-api(): " + "  Error : " + err + " for url: "+url
+        console.log(fssgf );
+		
+		
+		console.log("AppDataProvidedBySS: "+JSON.stringify(AppDataProvidedBySS) );
+		
+		
+  
+		
+		
+		//getDownloadLinkForUploader4ToUSeBeforeQueue(msg,ioClient4SS,usersinfo,true)
+		
+		return resolve(true)		
+      });			
+		
+
+    }) 
+  
+  
+}
+
 
  // Use express.json() middleware to parse JSON request bodies
 app.use(express.json());
@@ -332,17 +477,10 @@ var uniqueId = generateUniqueId(data.owner+"_"+data.app);
 		console.log(uniqueId); // Output: myUniquePrefix-a74c35f2
 	data.uid=uniqueId
 	data.appName=data.app
-	data.version=1//data.version
-if(exelunchers.length>0)	
-{ 
-	exelunchers[0].emit("startStreamingAppLunchingProcess", data);
-	   // Send a response (e.g., acknowledge receipt)
-  res.status(200).json( { uid: uniqueId } );
-}
-else
-{
-	 res.status(200).json( { exelunchers_length: exelunchers.length } );
-}
+	data.version=-1//data.version
+	getDownloadLinkForUploader4ToUSeBeforeQueue(data,res)
+	
+
 
 
 	
