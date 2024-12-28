@@ -213,6 +213,7 @@ try {
 
 
 function askTostartStreamingAppLunchingProcess(dataToSend) {
+	dataToSend.ss_config=config 
 	dataToSend.PublicIp=config.PublicIp
 	dataToSend.StreamerPort=config.StreamerPort
 	var url="https://"+config.MatchmakerAddress + ":"+config.MatchmakerPort+"/startStreamingAppLunchingProcess"
