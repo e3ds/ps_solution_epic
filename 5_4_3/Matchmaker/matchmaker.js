@@ -151,7 +151,7 @@ function generateUniqueId(prefix) {
   const randomPart = Math.random().toString(16).substring(2, 10); 
 
   // Combine the prefix with the random part
-  return `${prefix}-${randomPart}`;
+  return `${prefix}_${randomPart}`;
 }
 
 
