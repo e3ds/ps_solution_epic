@@ -2,6 +2,33 @@
 
 //-- Server side logic. Serves pixel streaming WebRTC-based page, proxies data back to Streamer --//
 
+
+function postToTelegram(message,input_chat_id= -4124108772) 
+{
+	
+	axios.post("http://notifications.eagle3dstreaming.com:8080/message_sent", 
+	{
+	  "input_chat_id": input_chat_id,//-1001587349178,
+	  "message":message
+	}, 
+	{
+	  headers: {
+		'Content-Type': 'application/json'
+	  }
+	})
+	 .then((res) => 
+	  {
+        console.log("postToTelegram() message sent:" +message);
+        
+      })
+	  .catch(err => 
+									{
+									  console.error(err);
+								});	
+}
+
+
+
 var express = require('express');
 var app = express();
 
@@ -253,6 +280,27 @@ function askTostartStreamingAppLunchingProcess(dataToSend,res) {
 		 
 		res.render(ejsViewFile, {myStringValue});
 		
+	  }
+	  else if(response.data.error)
+	  {
+		 
+		 
+		res.send(response.data.error);
+		
+	  }
+	  else if (response.data.exelunchers_length)
+	  {
+		  if (response.data.exelunchers_length<=0)
+		  {
+			   app.set("views", __dirname + "/views");
+			 app.set("views", __dirname + "/Public");
+			 
+			 var ejsViewFile='player'
+			 
+			 var myStringValue =response.data.uid
+			 res.render(ejsViewFile, {myStringValue});
+		  }
+		  
 	  }
 	  
     })
@@ -651,6 +699,7 @@ function onStreamerDisconnected(streamer) {
 	
 	//if(players.size<=0)
 	//{
+		if(exeluncher)
 		exeluncher.disconnect(); 
 	//}
 	
@@ -1422,7 +1471,12 @@ function shutDownAppAndDoPostShutdownTasks(uid)//isAppPreAllocateCmd=false)
   console.log("shutDownAppAndDoPostShutdownTasks data: ");
   console.dir(data);
  
- exeluncher.emit("shutDownAppAndDoPostShutdownTasks", data);
+ if(exeluncher)
+	exeluncher.emit("shutDownAppAndDoPostShutdownTasks", data);
+	else
+	{
+		postToTelegram("el dead but ue app running "+ JSON.stringify(data),-811123300)   // need to send ue exe command to quite
+	}
 }
 
 

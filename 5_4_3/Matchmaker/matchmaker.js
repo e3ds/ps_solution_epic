@@ -309,22 +309,20 @@ const axiosInst = axios.create({
   }),
 });
 
-async function getDownloadLinkForUploader4ToUSeBeforeQueue(data,res111) 
-{
 
-	
-			AppDataProvidedBySS=data
-			msg=data
-			
-			
+
+var waitingReuests=[]
+async function getDownloadLinkForUploader4ToUSeBeforeQueue(req_data,res111) 
+{
+console.log("---------getDownloadLinkForUploader4ToUSeBeforeQueue req_data: " + JSON.stringify(req_data));
 				var url=  
 				"https://upload-api.eagle3dstreaming.com/api/v1/files/coreweave"
 				 
 				  +"/streamingapp/"
 				
-				  +msg.owner
+				  +req_data.owner
 				  +"/"
-				  +msg.appName
+				  +req_data.appName
 				 // +"&region="
 				 // +GcsRegion.regionCode
 				 // +"&direct="+false
@@ -333,9 +331,9 @@ async function getDownloadLinkForUploader4ToUSeBeforeQueue(data,res111)
 			
 	if
 	(
-	(AppDataProvidedBySS.version == -1)
+	(req_data.version == -1)
 	||
-	(AppDataProvidedBySS.version == undefined)
+	(req_data.version == undefined)
 	)
 	{
 				  url=  url+"latest"
@@ -344,7 +342,7 @@ async function getDownloadLinkForUploader4ToUSeBeforeQueue(data,res111)
 	}
 			  else
 			  {
-				 url=  url+AppDataProvidedBySS.version
+				 url=  url+req_data.version
 				 
 			  }
 			 
@@ -356,8 +354,8 @@ async function getDownloadLinkForUploader4ToUSeBeforeQueue(data,res111)
       .get(url)
       .then(async (res) => 
 	  {
-		  //  console.logColor(logging.Blue,"--------------getAppListOfFromGCS: "  +" . axiosInst data:" +JSON.stringify(res));
-		  console.logColor(logging.Blue,"111--------------getAppListOfFromGCS: "  +" . axiosInst data:" +JSON.stringify(res.data));
+		  //  console.logColor(logging.Red,"--------------getAppListOfFromGCS: "  +" . axiosInst data:" +JSON.stringify(res));
+		  console.logColor(logging.Red,"111--------------getAppListOfFromGCS: "  +" . axiosInst data:" +JSON.stringify(res.data));
 		  //res.data  :   {"status":"success","data":{"url":"https://e3dssp1.blob.core.windows.net/universal-upload-system-nodejs-ron/demo/ps501/1.zip"}}
 		
 		if(res.data.status=="error")
@@ -365,13 +363,14 @@ async function getDownloadLinkForUploader4ToUSeBeforeQueue(data,res111)
 			//:{"status":"error","message":"Not Found"}
 			if(res.data.message=="Not Found")
 			{
-				var messageToSend="showPageWIthMsg: "+AppDataProvidedBySS.owner+"/"+AppDataProvidedBySS.appName + " does not exist"
-				 messageToSend=AppDataProvidedBySS.owner+"/"+AppDataProvidedBySS.appName + " does not exist"
-				
-								
+				var messageToSend="showPageWIthMsg: "+req_data.owner+"/"+req_data.appName + " does not exist"
+				 messageToSend=req_data.owner+"/"+req_data.appName + " does not exist"
+				res111.status(200).json({ error: messageToSend }); 
+					 		
 				
 			}
-			
+			else
+				res111.status(200).json({ error: res.data.message }); 
 			 console.log(res.data.message);
 			
 		
@@ -379,9 +378,9 @@ async function getDownloadLinkForUploader4ToUSeBeforeQueue(data,res111)
 			
 			 console.log(res.data.stack);
 			
-
+			
       
-	   return resolve(false)	
+			return resolve(false)	
 		}
 		else
 		{
@@ -399,25 +398,64 @@ async function getDownloadLinkForUploader4ToUSeBeforeQueue(data,res111)
 			var version222=path.parse(res.data.data.filename).name
 			//var version222=path.parse(url).name
 			console.log("---------version222 : " + version222);
-			data.appDownloadInfo=res.data.data
-			data.version=version222
+			req_data.appDownloadInfo=res.data.data
+			req_data.version=version222
 			
 			
-			
+			var uniqueId = generateUniqueId(req_data.owner+"_"+req_data.appName); 
+			console.log(uniqueId); // Output: myUniquePrefix-a74c35f2
+			req_data.uid=uniqueId
+			req_data.appName=req_data.appName
+			//req_data.version=-1//req_data.version
+		  console.log(exelunchers.length );	
 			if(exelunchers.length>0)	
 			{ 
-			console.log("---------startStreamingAppLunchingProcess : " + JSON.stringify(data));
-				exelunchers[0].emit("startStreamingAppLunchingProcess", data);
-				   // Send a response (e.g., acknowledge receipt)
-			  res111.status(200).json( { uid: data.uid } );
+		
+				for (i = 0; i < exelunchers.length; i++) 
+				{
+					console.log(exelunchers.exeData );	
+					console.log(exelunchers.exeData.length );	
+					if
+					(
+						(exelunchers[i].exeData== undefined)
+						||
+						(exelunchers[i].exeData.length <=0) 
+					)
+						{
+								
+								
+								
+	
+							console.log("---------startStreamingAppLunchingProcess : " + JSON.stringify(req_data));
+							exelunchers[0].emit("startStreamingAppLunchingProcess", req_data);
+							   // Send a response (e.g., acknowledge receipt)
+							   
+							  
+							req_data.assignEL=util.inspect(exelunchers[0].id)
+			
+						 
+						  break
+							
+						}
+					
+				}
+			
 			}
 			else
 			{
-				 res111.status(200).json( { exelunchers_length: exelunchers.length } );
+				waitingReuests.push(req_data)
 			}
 			
 			 
-		
+			res111.status(200).json( req_data );
+							
+			 console.dir("req_data:"  );				
+			 console.dir(req_data );	
+
+
+	 console.dir("waitingReuests:"  );				
+			 console.dir(waitingReuests.length );				
+										 
 							
                     return resolve(true)	
 		}
@@ -429,7 +467,7 @@ async function getDownloadLinkForUploader4ToUSeBeforeQueue(data,res111)
         console.log(fssgf );
 		
 		
-		console.log("AppDataProvidedBySS: "+JSON.stringify(AppDataProvidedBySS) );
+		console.log("req_data: "+JSON.stringify(req_data) );
 		
 		
   
@@ -458,10 +496,10 @@ app.post('/startStreamingAppLunchingProcess', (req, res) => {
  // console.log('Request body:', req.body); // Log body for debugging
 
 
- const data = req.body; 
+ const req_data = req.body; 
 
   // Process the received data
-  console.log('Received data:', data); 
+  console.log('Received data:', req_data); 
  //console.dir(data); 
   //console.dir(data); 
   
@@ -473,12 +511,8 @@ app.post('/startStreamingAppLunchingProcess', (req, res) => {
   owner: 'demo',
   app: 'vr_ps_52'
 } */
-var uniqueId = generateUniqueId(data.owner+"_"+data.app); 
-		console.log(uniqueId); // Output: myUniquePrefix-a74c35f2
-	data.uid=uniqueId
-	data.appName=data.app
-	data.version=-1//data.version
-	getDownloadLinkForUploader4ToUSeBeforeQueue(data,res)
+
+	getDownloadLinkForUploader4ToUSeBeforeQueue(req_data,res)
 	
 
 
@@ -675,6 +709,7 @@ function startio_exeluncher() {
       "you are conneted to MMLineker.js   as exeluncher id:" +
       util.inspect(socket.id)
     );
+	socket.exeData=undefined
 
     //////////////////////////////upload
     
@@ -798,6 +833,98 @@ function startio_exeluncher() {
 
     //////////////////////////////upload
 
+
+  
+  socket.on("updateDSAppInfoOnCP", function (data) {
+	  
+	  socket.exeData=data
+	  console.logColor(logging.Red,"exeLuncher-->io_dsluncher  updateDSAppInfoOnCP   socket.exeData: "+JSON.stringify( socket.exeData) ); 
+	
+   // processLuncherDataForPublicMonitoring(dslunchers, data, socket);
+	  
+	     // [{"appName":"VirutalStudioDS","owner":"demo","dsLunchId":0,"version":5,"dsPort":21153,"pid":4152}]        
+
+		/* for (var i=0;i<data.length;i++) 
+		  {
+			  var dsLunchId22=data[i].dsLunchId
+			  
+			  	   console.log("dsLunchId22 : "+dsLunchId22)
+				  if(dsLunchId22 != undefined)
+				  {
+					 var res=dsLunchRes.get(dsLunchId22)
+					 
+					 if(res)
+					 {
+						 dsLunchRes.delete(dsLunchId22)
+						res.send(JSON.stringify(data[i]))
+						
+						
+					 }
+						
+				  }
+			  
+		  }
+
+	  
+	    for (var i=0;i<dslunchers.length;i++) 
+		  {
+			  if(dslunchers[i].socket.id == socket.id)
+			  {
+					  dslunchers[i].appInfo=data
+				
+				
+				  
+					
+			  }
+		  }
+			  
+	  for (let player of players.values()) 
+				  {
+					//players.set(playerId3435, { ws: ws, id: playerId3435,appRequestInfo:msg });
+					if 
+					(
+						(player.clientType == "controlpanel") 
+						 // &&
+						// (
+							// (player.isAdmin == true)
+							// ||				
+							// (player.owner == dslunchers[i].elInfo.preAllocateApp_owner)			
+						// ) 							
+					)
+					{
+						
+						if(player.isAdmin == true) 
+						{
+						 
+						
+						   sendAllDSInfoeToThisControlPanelPlayers(player.owner, player.ws);
+						}
+						else
+							sendAllDSAppInfoeToThisControlPanelPlayers(player.owner, player.ws);
+
+				 console.logColor(logging.Red,"io_dsluncher-->browser  updateDSAppInfoOnCP  : "+JSON.stringify(data) ); 
+	  
+					  player.ws.send(
+						JSON.stringify({
+						  type: "updateDSAppInfoOnCP",
+						  dsInfo: {
+							  socketid:dslunchers[i].socket.id, 
+							  appInfo:dslunchers[i].appInfo, 
+							  elInfo:dslunchers[i].elInfo
+
+							  }
+						  
+						})
+					  ); 
+					  
+					}
+				  } */
+	  
+	  
+	   }); 
+	
+	
+	
     socket.on("sendMMlinkerInfo", function (obj)
     {
 		//if(obj.el_version== config.el_version)
@@ -808,7 +935,7 @@ function startio_exeluncher() {
 
     socket.on("sendSslunchersList", function ()
     {
-      //console.logColor(logging.Blue,"Exeluncher--> MMLineker sendSslunchersList ");
+      //console.logColor(logging.Red,"Exeluncher--> MMLineker sendSslunchersList ");
 
      return
 
@@ -1035,13 +1162,13 @@ function sendExeluncherLunchAppCmd(ws)//isAppPreAllocateCmd=false)
 		sendIncludeInTimeRecordsOnlyToThisPlayer(ws,"sendExeluncherLunchAppCmdCalledAt",Date.now())
 		
 
-	console.logColor(logging.Blue, "sendExeluncherLunchAppCmd()  "); 
+	console.logColor(logging.Red, "sendExeluncherLunchAppCmd()  "); 
 	
 	console.logColor(    logging.Red,    "yyyyy 5555 serverOwner :" + serverOwner ) ;
  
  
 	 console.log(" sendExeluncherLunchAppCmd()" );
-	   console.logColor(logging.Blue, "444444 serverOwner = " + serverOwner);
+	   console.logColor(logging.Red, "444444 serverOwner = " + serverOwner);
   if (streamer !== undefined) 
   {
 	var msfsfsg=	"sendExeluncherLunchAppCmd() found streamer alreday connected "
@@ -1056,7 +1183,7 @@ function sendExeluncherLunchAppCmd(ws)//isAppPreAllocateCmd=false)
 	if(owner)
 		msfsfsg=msfsfsg+ " owner: "+owner
 	
-		postToTelegram2(msfsfsg,-811123300)  
+		//postToTelegram2(msfsfsg,-811123300)  
    console.log("sendExeluncherLunchAppCmd to  exeluncher skipped as a streamer already connected.  ");
     return;
   }
@@ -1107,10 +1234,10 @@ function sendExeluncherLunchAppCmd(ws)//isAppPreAllocateCmd=false)
 	
 	
 	  
-    console.logColor(logging.Blue, "yyyyy 111 serverOwner = " + serverOwner);
-console.logColor(logging.Blue, "appName = " + appName);
-console.logColor(logging.Blue, "version = " + version);
-console.logColor(logging.Blue, "configuration = " + configuration);
+    console.logColor(logging.Red, "yyyyy 111 serverOwner = " + serverOwner);
+console.logColor(logging.Red, "appName = " + appName);
+console.logColor(logging.Red, "version = " + version);
+console.logColor(logging.Red, "configuration = " + configuration);
 	
     if ( //!isAppPreAllocateCmd  && 
 	(configuration === undefined) )
@@ -1139,7 +1266,7 @@ console.logColor(logging.Blue, "configuration = " + configuration);
 		data.userDeviceInfo=userDeviceInfo
  
   //console.log(" exeluncher- lunchApp :" + JSON.stringify(data));
-	console.logColor(    logging.Blue,   "configuration :" + JSON.stringify(configuration));
+	console.logColor(    logging.Red,   "configuration :" + JSON.stringify(configuration));
 	console.logColor(    logging.Red,    "exeluncher- lunchApp :" 
 	//+ JSON.stringify(data) 
 	) ;
