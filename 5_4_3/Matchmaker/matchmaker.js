@@ -54,7 +54,7 @@ http.listen(config.HttpPort, () => {
     console.log('HTTP listening on *:' + config.HttpPort);
 });
 
-
+var httpsPort=443
 if (config.UseHTTPS) {
 	//HTTPS certificate details
 	const options = {
@@ -83,7 +83,7 @@ if (config.UseHTTPS) {
 		next();
 	});
 
-	https.listen(443, function () {
+	https.listen(httpsPort, function () {
 		console.log('Https listening on 443');
 	});
 }

@@ -648,6 +648,12 @@ function onStreamerDisconnected(streamer) {
 		disconnectAllPlayers(sfuPlayer.id);
 	}
 	disconnectAllPlayers(streamer.id);
+	
+	//if(players.size<=0)
+	//{
+		exeluncher.disconnect(); 
+	//}
+	
 	streamers.delete(streamer.id);
 }
 
@@ -1448,16 +1454,16 @@ io.on("connection", function (socket)
   
   
   
-  clearTimeout(settImeout_EL);
+  
 
-  if (exeluncher !== undefined) 
+  /* if (exeluncher !== undefined) 
   {
     var msg = "exeluncher already connected and alive. so rejecting ";
    // sendMessageToSocket(msg, socket);
 
     socket.disconnect(0); //2do----------this will make the exeluncher to stop working. need to make that to try to MM
     return;
-  }
+  } */
   exeluncher = socket;
   // console.log(socket);
 
@@ -1467,6 +1473,9 @@ io.on("connection", function (socket)
 
   socket.on("disconnect", function () 
   {
+	  
+	   console.log("exeluncher disconnected  id:" + util.inspect(socket.id));   
+	   exeluncher=undefined
 	  return
 	//set_state_CS("notReadyToServer")
     var clientDisconnectedMsg ="waiting 20 sec to exist as exeluncher disconnected " +util.inspect(socket.id);
@@ -2099,40 +2108,7 @@ function startServerListening(httpServer, port, logName) {
 
   httpServer.listen(port, function () {
     console.log(logName + " listening on *: " + port);
-    if (logName == "exeluncher") 
-	{
-		if
-								(
-									( config.isprocessinjectStreamFromEditor == true )
-									||( config.isprocessinjectStreamFromEditor == "true" )
-									||( config.isprocessinjectStreamFromEditor == 'true' )
-								)
-								{
-									 console.logColor(logging.Red," waiting for ue remote access steam as config.isprocessinjectStreamFromEditor:"+ config.isprocessinjectStreamFromEditor);
-								
-										//2do---add code to get ut if stream dont connect after waitng x min
-								}
-								else
-								{
-									settImeout_EL = setTimeout(function () 
-									  {
-										if (exeluncher === undefined) 
-										{
-											var fsgsg= " !!!!!!!!!!!exeluncher undefined after 60 sec waiting . no hope to get a streamer. quiting "
-									
-										  console.logColor(
-											logging.Blue,fsgsg
-												 );
-										  //exitSS("handleElDisconnected",fsgsg);
-										}
-									  }, 60 * 1000);
-								}
-		
-		
-				
-									  
-									  
-	}
+
   }); 
 }
 
