@@ -78,8 +78,9 @@ timeRecords.jsFileExecutionStartedAt=  getCurrentDate();
 
 function e3ds_onLoad() 
 {							
-							
-							
+			
+			
+					
 							 
 			var streamingVideo = document.getElementById("streamingVideo");
 		   if(streamingVideo)
@@ -219,4 +220,4 @@ function findNearestServer(ss_list, userLatitude, userLongitude) {
   return nearestServer;
 }
 
-
+		console.log("window.uid:"+window.uid)	
