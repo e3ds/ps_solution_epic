@@ -456,12 +456,16 @@ class Player {
 		return this.type == PlayerType.SFU;
 	}
 
-	subscribe(streamerId,msg22) {
+	subscribe(streamerId,msg22) 
+	{
 		if (!streamers.has(streamerId)) {
 			console.error(`subscribe: Player ${this.id} tried to subscribe to a non-existent streamer ${streamerId}`);
 			return;
 		}
 		this.uid = msg22.uid;
+		console.log("msg22:")
+		console.dir(msg22)
+		console.log(this.uid +"---"+ msg22.uid)
 		this.streamerId = streamerId;
 		if (this.type == PlayerType.SFU) {
 			let streamer = streamers.get(this.streamerId);
@@ -1001,11 +1005,24 @@ function onPlayerMessageStats(player, msg) {
 
 function onPlayerMessageListStreamers(player, msg) {
 	logIncoming(player.id, msg);
-
+	if
+	(
+	(player.uid == undefined)
+	&&
+	(msg.uid != undefined)
+	)
+	{
+		player.uid=msg.uid
+		console.log(msg.uid +" --> "+ player.uid)
+	}
+		
 	let reply = { type: 'streamerList', ids: [] };
 	for (let [streamerId, streamer] of streamers) {
-		reply.ids.push(streamerId);
+		console.log(streamerId +"---"+ player.uid)
+		if(streamerId == player.uid)
+			reply.ids.push(streamerId);
 	}
+
 
 	logOutgoing(player.id, reply);
 	player.sendTo(reply);
@@ -1063,6 +1080,8 @@ playerServer.on('connection', function (ws, req) {
 		var msg;
 		try {
 			msg = JSON.parse(msgRaw);
+			console.log("msg-->")
+			console.dir(msg)
 		} catch (err) {
 			console.error(`Cannot parse player ${playerId} message: ${msgRaw}\nError: ${err}`);
 			ws.close(1008, 'Cannot parse');
