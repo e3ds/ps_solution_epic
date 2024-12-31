@@ -311,7 +311,7 @@ const axiosInst = axios.create({
 
 
 
-var waitingReuests=[]
+var waitingRequests=[]
 async function getDownloadLinkForUploader4ToUSeBeforeQueue(req_data,res111) 
 {
 console.log("---------getDownloadLinkForUploader4ToUSeBeforeQueue req_data: " + JSON.stringify(req_data));
@@ -408,43 +408,27 @@ console.log("---------getDownloadLinkForUploader4ToUSeBeforeQueue req_data: " + 
 			req_data.appName=req_data.appName
 			//req_data.version=-1//req_data.version
 		  console.log(exelunchers.length );	
-			if(exelunchers.length>0)	
-			{ 
-		
+			 
+		var found=false
 				for (i = 0; i < exelunchers.length; i++) 
 				{
-					console.log(exelunchers.exeData );	
-					console.log(exelunchers.exeData.length );	
-					if
-					(
-						(exelunchers[i].exeData== undefined)
-						||
-						(exelunchers[i].exeData.length <=0) 
-					)
+					//console.log(exelunchers.exeData );	
+					//console.log(exelunchers.exeData.length );	
+					if(isElAssignable(exelunchers[i]) )
 						{
-								
-								
-								
-	
-							console.log("---------startStreamingAppLunchingProcess : " + JSON.stringify(req_data));
-							exelunchers[0].emit("startStreamingAppLunchingProcess", req_data);
-							   // Send a response (e.g., acknowledge receipt)
-							   
-							  
-							req_data.assignEL=util.inspect(exelunchers[0].id)
-			
-						 
+							assignReqToEl(exelunchers[i],req_data) 
+							 found=true 
+							//req_data.assignEL=util.inspect(exelunchers[i].id)
 						  break
 							
 						}
 					
 				}
 			
-			}
-			else
-			{
-				waitingReuests.push(req_data)
-			}
+			
+			if(found == false)
+				waitingRequests.push(req_data)
+			
 			
 			 
 			res111.status(200).json( req_data );
@@ -453,8 +437,9 @@ console.log("---------getDownloadLinkForUploader4ToUSeBeforeQueue req_data: " + 
 			 console.dir(req_data );	
 
 
-	 console.dir("waitingReuests:"  );				
-			 console.dir(waitingReuests.length );				
+		console.dir("waitingReuests:"  );				
+			 console.dir(waitingRequests.length );				
+			 console.dir(waitingRequests );				
 										 
 							
                     return resolve(true)	
@@ -484,6 +469,71 @@ console.log("---------getDownloadLinkForUploader4ToUSeBeforeQueue req_data: " + 
   
 }
 
+
+function isElAssignable(el) 
+{
+	if(
+	(el.isAssigned != true)
+						&&
+						(
+							(el.exeData== undefined)
+							||
+							(el.exeData.length <=0) 
+						)
+	)
+		return true
+		else
+			return false 
+	
+}
+
+
+function assignReqToEl(el,req_data,j=undefined) 
+{
+	el.isAssigned=true
+							console.log("---------startStreamingAppLunchingProcess : " + JSON.stringify(req_data));
+							el.emit("startStreamingAppLunchingProcess", req_data);
+							   // Send a response (e.g., acknowledge receipt)
+							   
+							  
+							req_data.assignEL=util.inspect(el.id)
+	
+	if(j != undefined)
+	waitingRequests.splice(j, 1);
+}
+
+
+function processWaitingRequests() 
+{
+	
+	
+	if(waitingRequests.length>0)
+	{
+		for (j = 0; j < waitingRequests.length; j++) 
+		{
+			var req_data=waitingRequests[j]
+			for (i = 0; i < exelunchers.length; i++) 
+				{
+					//console.log(exelunchers.exeData );	
+					//console.log(exelunchers.exeData.length );	
+					if(isElAssignable(exelunchers[i]) )
+						{
+							assignReqToEl(exelunchers[i],req_data,j) 
+							  
+							//req_data.assignEL=util.inspect(exelunchers[i].id)
+						  break
+							
+						}
+					
+				}
+			
+					
+		}
+		
+	}
+	
+	
+}
 
  // Use express.json() middleware to parse JSON request bodies
 app.use(express.json());
@@ -711,6 +761,8 @@ function startio_exeluncher() {
     );
 	socket.exeData=undefined
 
+
+	processWaitingRequests() 
     //////////////////////////////upload
     
     socket.on("sendmeafile", function (data)
@@ -840,6 +892,11 @@ function startio_exeluncher() {
 	  socket.exeData=data
 	  console.logColor(logging.Red,"exeLuncher-->io_dsluncher  updateDSAppInfoOnCP   socket.exeData: "+JSON.stringify( socket.exeData) ); 
 	
+	if(socket.exeData.length<=0)
+	{
+		socket.isAssigned=false
+		processWaitingRequests() 
+	}
    // processLuncherDataForPublicMonitoring(dslunchers, data, socket);
 	  
 	     // [{"appName":"VirutalStudioDS","owner":"demo","dsLunchId":0,"version":5,"dsPort":21153,"pid":4152}]        
