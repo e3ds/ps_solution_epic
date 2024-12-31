@@ -312,6 +312,49 @@ function askTostartStreamingAppLunchingProcess(dataToSend,res) {
 }
 
 
+function askToCleanQueueForThisPlayer(player) 
+{
+	var dataToSend={
+		
+		uid:player.uid
+	}
+	dataToSend.ss_config=config 
+	dataToSend.PublicIp=config.PublicIp
+	dataToSend.StreamerPort=config.StreamerPort
+	var url="https://"+config.MatchmakerAddress + ":"+config.MatchmakerPort+"/askToCleanQueueForThisPlayer"
+	 console.log('askToCleanQueueForThisPlayer url:'+url); 
+	 console.dir(dataToSend); 
+  axios.post(url, dataToSend)
+    .then(response => {
+      console.log('askToCleanQueueForThisPlayer Data sent successfully:', response.data); 
+	  
+	  
+	  if(response.data.uid)
+	  {
+		  
+		
+	  }
+	  else if(response.data.error)
+	  {
+		 
+		 
+		
+		
+	  }
+	 // else if (response.data.exelunchers_length)
+	 // {
+		 
+		  
+	 // }
+	  
+    })
+    .catch(error => {
+      console.error('askToCleanQueueForThisPlayer trying again , bcz Error sending data:', error);
+	  
+	  askToCleanQueueForThisPlayer(dataToSend)
+    });
+}
+
 
 if(config.EnableWebserver) {
 
@@ -1035,6 +1078,7 @@ function forwardPlayerMessage(player, msg) {
 
 function onPlayerDisconnected(playerId) {
 	const player = players.get(playerId);
+	askToCleanQueueForThisPlayer(player) 
 	shutDownAppAndDoPostShutdownTasks(player.uid)
 	player.unsubscribe();
 	players.delete(playerId);

@@ -538,7 +538,36 @@ function processWaitingRequests()
  // Use express.json() middleware to parse JSON request bodies
 app.use(express.json());
 	
-app.post('/startStreamingAppLunchingProcess', (req, res) => {
+	
+	function removeFromWaitingRequests(waitingRequests, uid) {
+  const indexToRemove = waitingRequests.findIndex(request => request.uid === uid);
+
+  if (indexToRemove !== -1) {
+    waitingRequests.splice(indexToRemove, 1); 
+  }
+
+console.dir(waitingRequests)
+  return waitingRequests; 
+}
+
+
+app.post('/askToCleanQueueForThisPlayer', (req, res) => {
+ 
+ 
+
+ //console.log('Request received:', req.headers); // Log headers for debugging
+ // console.log('Request body:', req.body); // Log body for debugging
+
+
+ const req_data = req.body; 
+
+  // Process the received data
+  console.log('askToCleanQueueForThisPlayer Received data:', req_data);
+  removeFromWaitingRequests(waitingRequests, req_data.uid)
+  
+})
+  
+  app.post('/startStreamingAppLunchingProcess', (req, res) => {
  
  
 
