@@ -260,7 +260,7 @@ function askTostartStreamingAppLunchingProcess(dataToSend,res) {
 	dataToSend.PublicIp=config.PublicIp
 	dataToSend.StreamerPort=config.StreamerPort
 	var url="https://"+config.MatchmakerAddress + ":"+config.MatchmakerPort+"/startStreamingAppLunchingProcess"
-	 /console.log('askTostartStreamingAppLunchingProcess url:'+url); 
+	 console.log('askTostartStreamingAppLunchingProcess url:'+url); 
 	 console.dir(dataToSend); 
   axios.post(url, dataToSend)
     .then(response => {
@@ -746,8 +746,9 @@ function onStreamerDisconnected(streamer) {
 	
 	//if(players.size<=0)
 	//{
-		if(exeluncher)
-		exeluncher.disconnect(); 
+		// exeluncher=undefined
+		// if(exeluncher)
+		// exeluncher.disconnect(); 
 	//}
 	
 	streamers.delete(streamer.id);
@@ -1527,114 +1528,380 @@ io.set('pingTimeout', 4000);
 
 function shutDownAppAndDoPostShutdownTasks(player)//isAppPreAllocateCmd=false) 
 {
-	   var data = {
-    uid: player.uid
-   
-  };
-  console.log("shutDownAppAndDoPostShutdownTasks data: ");
-  console.dir(data);
- 
- if(player.el)
-	player.el.emit("shutDownAppAndDoPostShutdownTasks", data);
-	else
-	{
-		postToTelegram("player.el undefined may be  ue app running "+ JSON.stringify(data),-811123300)   // need to send ue exe command to quite
-	}
+	
+	var found=false
+				for (i = 0; i < exelunchers.length; i++) 
+				{
+					
+					console.log(exelunchers.length );
+					console.log(exelunchers[i].elInfo.uid );						
+					console.log(player.uid );						
+					if(exelunchers[i].elInfo.uid==player.uid ) 
+						{
+							  var data = {
+								uid: player.uid
+							   
+							  };
+							exelunchers[i].emit("shutDownAppAndDoPostShutdownTasks", data);
+							  console.log("shutDownAppAndDoPostShutdownTasks data: ");
+								console.dir(data);
+  
+							 found=true 
+							
+						  break
+							
+						}
+					
+				}
+			
+			
+			if(found == false)
+		
+			{
+				postToTelegram("el for player.uid:"+player.uid+" not found. may be  ue app running "+ JSON.stringify(data),-811123300)   // need to send ue exe command to quite
+			}
+			
+
+	
 }
 
 
-var exeluncher;
-io.on("connection", function (socket) 
-{
-  var clientConnectedMsg = "exeluncher connected id:" + util.inspect(socket.id);
-  console.log(clientConnectedMsg);
-  
- /*  const isReconnection = socket.handshake.query.reconnection === 'true';
-  
-   console.logColor(logging.Red, "isReconnection ->  " + isReconnection);
-	if (isReconnection) 
-	  {
-		// Handle reconnection attempt
-		 exeluncher = socket;
-		 socket.send("you are reconneted to SS  server as a restored exeluncher ");
-	  } 
-	  else 
-	  {
-		// Handle new connection
-	  }
-	  
-	 
-	 
-  const clientIp = socket.request.headers['x-forwarded-for'] || socket.request.connection.remoteAddress;
-  console.logColor(logging.Red, "clientIp ->  " + clientIp);
- */
-  
-  
-  
-  
+//******************************************************************exeluncher
+/* 
 
-  /* if (exeluncher !== undefined) 
-  {
-    var msg = "exeluncher already connected and alive. so rejecting ";
-   // sendMessageToSocket(msg, socket);
-
-    socket.disconnect(0); //2do----------this will make the exeluncher to stop working. need to make that to try to MM
-    return;
-  } */
-  exeluncher = undefined;
-  // console.log(socket);
-
-  // console.info(`Client connected [id=${socket.id}]`);
-
-  socket.send("you are conneted to SS  server as exeluncher ");
-
-  socket.on("disconnect", function () 
-  {
-	  
-	   console.log("exeluncher disconnected  id:" + util.inspect(socket.id));   
-	   exeluncher=undefined
-	  return
-	//set_state_CS("notReadyToServer")
-    var clientDisconnectedMsg ="waiting 20 sec to exist as exeluncher disconnected " +util.inspect(socket.id);
-    console.log(clientDisconnectedMsg);
-	
-	var tttt=elInfo.instanceId_exeLuncher 
-	+" : "
-	+elInfo.computerName 
-	+" : "
-	
-	+clientDisconnectedMsg
-	 console.log(tttt);
-	 
-	 console.logColor(logging.Red, "didReceivePrepareForShutDownCmd ->  " + didReceivePrepareForShutDownCmd);
-	 
-	 if(!didReceivePrepareForShutDownCmd)
-		postToTelegram2("ss-->"+clientDisconnectedMsg,-967478195)
-	
-	setTimeout(		
-					function () 
-					{ 
-
-						if (!socket.connected && socket.disconnected) 
-						{
-						  //2do-need a way to resend messages to EL to start to listen tho this ss port
-						  //2do--if streamer still alive and a player is using it  than dont exist sss and keep seriving user
-						  exeluncher = undefined;
-						  
-						  
-						   setTimeout(function () 
-									  {
-										exitSS("handleElDisconnected","handleElDisconnected-->socket.disconnected");
-									  }
-									  , 2000);
-						  
-
-						}
-					}, 
-			20*1000) 
+const socketio = require('socket.io');
 
 
+const server = require('http').createServer(app);
+const io = socketio(server);
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  socket.on('message', (msg) => {
+    console.log('Message from client:', msg);
+    io.emit('broadcast', msg); // Broadcast to all connected clients
   });
+
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
+});
+
+server.listen(3000, () => {
+  console.log('Server listening on port 3000');
+});
+
+ */
+///////////////////////exeluncher
+var exeluncherPort=config.exeluncherPort
+var exelunchers = [];
+var app_exeluncher = require("express")();
+var http_exeluncher = require("http").Server(app_exeluncher);
+var io_exeluncher = require("socket.io")(http_exeluncher);
+var util = require("util");
+function startio_exeluncher() {
+  io_exeluncher.on("connection", function (socket)
+  {
+	  exelunchers.push(socket)
+	  
+    console.log(
+      "exeluncher connected id:" +
+      util.inspect(socket.id) +
+      ", total: " +
+      exelunchers.length
+    );
+    
+    socket.send(
+      "you are conneted to MMLineker.js   as exeluncher id:" +
+      util.inspect(socket.id)
+    );
+	socket.exeData=undefined
+
+
+	
+    //////////////////////////////upload
+    
+    socket.on("sendmeafile", function (data)
+    {
+		const ss = require("socket.io-stream");
+      // data-->	appName: appName //"DHP_Config_Desktop"
+      // ,version: version //"DHP_Config_Desktop"
+      // ,SSAddress: serverPublicIp
+      // ,ue4StreamerToSS: streamerPort
+
+      console.log(
+        "11111111111111 Exeluncher--> MMLineker sendmeafile " +
+        JSON.stringify(data)
+      );
+
+      //file
+
+      var filePath =
+        exeDirectory + "\\" + data.owner + "\\" + data.appName + "\\";
+      var filename = data.version + ".zip"; //'macthMakerNormal.7z';
+
+      var fullFilePath = filePath + filename;
+
+      console.log("searching for:" + fullFilePath);
+
+      if (!fs.existsSync(fullFilePath))
+      {
+        console.log("FileDoesNotExist :" + fullFilePath);
+        console.log(
+          "11111111111111 MMLineker-->Exeluncher FileDoesNotExist " +
+          JSON.stringify(data)
+        );
+
+        socket.emit("FileDoesNotExist", data);
+        return;
+      }
+      console.log(
+        "path.basename(path.dirname(filename)) : " +
+        path.basename(path.dirname(fullFilePath))
+      );
+      console.log("sendmeafile : " + fullFilePath);
+
+      var stats = fs.statSync(fullFilePath);
+      var fileSizeInBytes = stats["size"];
+
+      //console.log('111111111111 stats["size"]: '+stats["size"]);
+      //console.log('111111111111 stats.size: '+stats.size);
+
+      var zipSize = stats.size;
+      var uploadedSize = 0;
+
+      //fs to read file
+      var zipReadStream = fs.createReadStream(fullFilePath);
+
+      zipReadStream.on("data", function (buffer)
+      {
+        var segmentLength = buffer.length;
+
+        // Increment the uploaded data counter
+        uploadedSize += segmentLength;
+
+        // Display the upload percentage
+
+        var ttt = ((uploadedSize / zipSize) * 100).toFixed(2) + "%";
+        //console.log("Progress:\t",ttt);
+        process.stdout.write("uploaded " + ttt + " \r");
+      });
+
+      // Some other events you might want for your code
+      zipReadStream.on("end", function ()
+      {
+        console.log("zipReadStream : end");
+      });
+      zipReadStream.on("close", function ()
+      {
+        console.log("zipReadStream : close");
+      });
+
+      //socket.io-stream
+      var stream = ss.createStream(); //createStream() returns a new stream which can be sent by emit().
+
+      stream.on("end", function ()
+      {
+        console.log("111111111111socket.io-stream: stream end");
+      });
+      ss(socket).emit("sending", stream, {
+        filename: filename,
+        fileSize: zipSize,
+        parentFolder: path.basename(path.dirname(fullFilePath)),
+        AppInfoRequested2Linker: data,
+      });
+
+      //combine operation
+
+      zipReadStream.pipe(stream);
+
+      /*
+															//Upload progress
+															var blobStream = ss.createBlobReadStream(filePath+filename);//createStream() returns a new stream which can be sent by emit().
+
+															blobStream.on('end', function ()
+																				{
+																					console.log('111111111111 blobStream file sent');
+																				}
+																	  );
+
+
+															var size = 0;
+
+
+															blobStream.on('data', function(chunk)
+																					{
+																						size += chunk.length;
+																						console.log(Math.floor(size / file.size * 100) + '%');
+																						// -> e.g. '42%'
+																					}
+																		 );
+															blobStream.pipe(stream); */
+    });
+
+    //////////////////////////////upload
+
+
+  
+  socket.on("updateDSAppInfoOnCP", function (data) {
+	  
+	  socket.exeData=data
+	  console.logColor(logging.Red,"exeLuncher-->io_dsluncher  updateDSAppInfoOnCP   socket.exeData: "+JSON.stringify( socket.exeData) ); 
+	
+	if(socket.exeData.length<=0)
+	{
+		socket.isAssigned=false
+		processWaitingRequests() 
+	}
+   // processLuncherDataForPublicMonitoring(dslunchers, data, socket);
+	  
+	     // [{"appName":"VirutalStudioDS","owner":"demo","dsLunchId":0,"version":5,"dsPort":21153,"pid":4152}]        
+
+		/* for (var i=0;i<data.length;i++) 
+		  {
+			  var dsLunchId22=data[i].dsLunchId
+			  
+			  	   console.log("dsLunchId22 : "+dsLunchId22)
+				  if(dsLunchId22 != undefined)
+				  {
+					 var res=dsLunchRes.get(dsLunchId22)
+					 
+					 if(res)
+					 {
+						 dsLunchRes.delete(dsLunchId22)
+						res.send(JSON.stringify(data[i]))
+						
+						
+					 }
+						
+				  }
+			  
+		  }
+
+	  
+	    for (var i=0;i<dslunchers.length;i++) 
+		  {
+			  if(dslunchers[i].socket.id == socket.id)
+			  {
+					  dslunchers[i].appInfo=data
+				
+				
+				  
+					
+			  }
+		  }
+			  
+	  for (let player of players.values()) 
+				  {
+					//players.set(playerId3435, { ws: ws, id: playerId3435,appRequestInfo:msg });
+					if 
+					(
+						(player.clientType == "controlpanel") 
+						 // &&
+						// (
+							// (player.isAdmin == true)
+							// ||				
+							// (player.owner == dslunchers[i].elInfo.preAllocateApp_owner)			
+						// ) 							
+					)
+					{
+						
+						if(player.isAdmin == true) 
+						{
+						 
+						
+						   sendAllDSInfoeToThisControlPanelPlayers(player.owner, player.ws);
+						}
+						else
+							sendAllDSAppInfoeToThisControlPanelPlayers(player.owner, player.ws);
+
+				 console.logColor(logging.Red,"io_dsluncher-->browser  updateDSAppInfoOnCP  : "+JSON.stringify(data) ); 
+	  
+					  player.ws.send(
+						JSON.stringify({
+						  type: "updateDSAppInfoOnCP",
+						  dsInfo: {
+							  socketid:dslunchers[i].socket.id, 
+							  appInfo:dslunchers[i].appInfo, 
+							  elInfo:dslunchers[i].elInfo
+
+							  }
+						  
+						})
+					  ); 
+					  
+					}
+				  } */
+	  
+	  
+	   }); 
+	
+	
+	
+    socket.on("sendMMlinkerInfo", function (obj)
+    {
+		//if(obj.el_version== config.el_version)
+			//socket.emit("taskeMMlinkerInfo", MMLinkerInfo);
+		//else
+		//	socket.emit("secretKeyMismatched");
+    });
+
+    socket.on("sendSslunchersList", function ()
+    {
+      //console.logColor(logging.Red,"Exeluncher--> MMLineker sendSslunchersList ");
+
+     return
+
+      // console.log(sslunchers  );
+      var temp = [];
+      var toremove = [];
+      for (i = 0; i < sslunchers.length; i++)
+      {
+        var entry = sslunchers[i];
+
+        if (
+          entry.socket !== undefined && //checking if by any chance if this ssluncher is dead one and somehow wasskipped removeFromArray
+          entry.socket.connected &&
+          !entry.socket.disconnected
+        )
+        {
+          var tt = {
+            ssluncher_ip: entry.ssluncher_ip,
+            exeluncherPort: entry.exeluncherPort,
+            SSNum: entry.SSNum,
+            queue: entry.queue
+          };
+          temp.push(tt);
+        }
+        else
+        {
+          console.log(
+            "sendSslunchersList: found an dead ssluncher: " +
+            entry.ssluncher_ip +
+            ":" +
+            entry.exeluncherPort +
+            " , id: " +
+            entry.socket.id
+          );
+          //2do-should we rrmoave this from list. or keep it for futurte tarcking purpose to find out why they skippedin removeFromArray
+		  toremove.push(i);
+		   
+        }
+      }
+
+	for (i = 0; i < toremove.length; i++)
+      {
+		sslunchers.splice(toremove[i], 1);
+	  }
+
+      //console.log(temp  );
+
+      //socket.emit("taskeSSLuncherArray",sslunchers);
+      socket.emit("taskeSSLuncherArray", temp);
+	  // console.log("MMLineker--> Exeluncher taskeSSLuncherArray "+JSON.stringify(temp));
+    });
+
 
   socket.on("message", function (msg2222) {
     console.log("Exeluncher --> ss  message: " + msg2222);
@@ -1665,7 +1932,6 @@ io.on("connection", function (socket)
    
    
   }); 
-  
   
   socket.on("PsPluginEntryInManifestFile", function (boolValue) {
 	    
@@ -1824,239 +2090,7 @@ io.on("connection", function (socket)
 		//exitSS("handleElDisconnected","handleElDisconnected: exeLuncher-->ss exitTheprocess");
   });
 
-  socket.on("takeElInfo", function (jsonObj) 
-  {
-    console.logColor(
-      logging.Blue,
-      "takeElInfo jsonObj ->  " //+ JSON.stringify(jsonObj)
-    );
-    elInfo = jsonObj;
-	
-	console.log(players.size);
-	console.log(jsonObj.uid);
-	for (let player of players.values()) 
-	{
-		 console.log(player.uid);
-		 
-		if(player.uid == jsonObj.uid)
-		{
-			
-			player.el=socket
-			break
-		}
-	}
-	
-	
-	
-    ec2_region = jsonObj.ec2_region;
-    instanceId_exeLuncher = jsonObj.instanceId_exeLuncher;
-    instanceId = instanceId_exeLuncher;
-    //serverOwner=jsonObj.serverOwner
-
-    //if(	jsonObj.hasOwnProperty("onDemandMachine"))
-    //{
-    isOnDemandMachine = jsonObj.isOnDemandMachine;
-    computerName = jsonObj.computerName;
-    userName = jsonObj.userName;
-    platformType = jsonObj.platformType;
-    ec2_region = jsonObj.ec2_region;
-
-    //}
-	
-	/*if(elInfo.serverOwner !="")
-	{
-		serverOwner =elInfo.serverOwner
-		
-		var message = {
-			  //playersInfo: playersInfo,
-			  //numConnectedPlayers: players.size,
-			  //numConnectedSpectators: spectatorNum,
-			  //hostMeetingId: hostMeetingId,
-			  owner: serverOwner,
-			  //appName: appName,
-			  //elInfo: elInfo,
-			 // userDeviceInfo:userDeviceInfo
-			};
-	
-		for (i = 0; i < matchmakerAddressInfo.length; i++)
-		{
-			  var efsf = matchmakerAddressInfo[i];
-			  if (
-			  efsf.matchmaker_io_client&&
-			  
-				efsf.matchmaker_io_client.connected &&
-				!efsf.matchmaker_io_client.disconnected
-			  )
-						  {
-						efsf.matchmaker_io_client.emit("updateCircusInfoUponAllocatedByOwner", message);
-						
-						 console.logColor(
-					  logging.Green,
-					  " -------updateCircusInfoUponAllocatedByOwner obj:     " + JSON.stringify(message)
-					);
-			  }
-		}
-	} */
-	
-	if(elInfo.preAllocateApps)
-	{
-		appName =elInfo.preAllocateApp_name
-		 console.log("yyyyyyyyy 2");
-		serverOwner =elInfo.preAllocateApp_owner
-		configuration =undefined
-		configurationName =elInfo.preAllocateApp_configurationName
-		version="-1"
-	}
-
-    titleID = computerName;
-   /*  if (jsonObj.computerName.startsWith("EC2")) 
-	{
-      platformType = 2;
-      titleID = instanceId_exeLuncher;
-    } 
-	else if (jsonObj.computerName.toLowerCase().startsWith("azure")) 
-	{
-      platformType = 4;
-      titleID = instanceId_exeLuncher;
-    } */
-
-	if( ( platformType== 2)||( platformType== 3)|| ( platformType== 4))
-		titleID = instanceId_exeLuncher;
- 
-    console.logColor(logging.Yellow, "platformType ->  " + platformType);
-
-    //setTitle("Free : " + httpsPort + " : " + streamerPort + " : " + titleID);
-    console.logColor(
-      logging.Blue,
-      " isOnDemandMachine ->  " + isOnDemandMachine
-    );
-	
-     epicTurnServerOnELMachine = {
-      iceServers: [
-        {
-          urls: [
-            "stun:" + jsonObj.serverPublicIp + ":19302",
-            "turn:" + jsonObj.serverPublicIp + ":19303",
-            //,"turn:"+serverPublicIp+":19303?transport=tcp"
-          ],
-          username: "PixelStreamingUser",
-          credential: "Another TURN in the road",
-        },
-      ],
-    };
-
-     coTurnOnELMachine = {
-      iceServers: [
-        {
-          urls: [
-            //"stun:204.236.175.164:7890"
-            //,
-
-            "turn:" + jsonObj.serverPublicIp + ":7890?transport=udp",
-
-            "turn:" + jsonObj.serverPublicIp + ":7890?transport=tcp",
-
-            // ,"turn:204.236.175.164:7890?transport=dtls"
-
-            // ,"turn:204.236.175.164:7890?transport=SCTP "
-
-            // ,"turn:204.236.175.164:5349?transport=tls"
-          ],
-          username: "username1",
-          credential: "key1",
-        },
-      ],
-    };
-	
-	//0-local
-//1-persdonal server
-//2-aws
-//3-gcp
-//4-azure
-
-
-   // if( (platformType== 1) ||(platformType== 2)|| (platformType== 3) )
-	//{
-      //clientConfig4Stremer.peerConnectionOptions = xirsysUSFromEagle;
-  //  } 
-	
-	
-	
-	
-	/* if(elInfo.el_twillo_ice_servers != undefined)
-	{
-		//xirsysGeoTurnBasedOnELLocation =elInfo.el_twillo_ice_servers
-	}
-	else  */if
-	(
-		(elInfo.xirysobj != undefined)
-		//&&
-		//((Object.keys(elInfo.xirysobj).length > 0))
-	)
-	{
-		// try 
-		// {
-					//var obj = JSON.parse(elInfo.xirysobj);
-
-					console.logColor(
-					  logging.Blue,
-					  "elInfo xirsysResponse:  " + JSON.stringify(elInfo.xirysobj)
-					);
-					
-					if(elInfo.xirysobj.v)
-					{
-					
-					xirsysGeoTurnBasedOnELLocation={
-					  iceServers: [
-						//{urls: [ "stun:us-turn3.xirsys.com" ]},
-						{
-						  username: elInfo.xirysobj.v.iceServers.username,
-						  credential: elInfo.xirysobj.v.iceServers.credential,
-						  urls: elInfo.xirysobj.v.iceServers.urls,
-						},
-					  ],
-					};
-					}
-					else
-						xirsysGeoTurnBasedOnELLocation={}
-				   
-		// } 
-				  
-		// catch (err) 
-		// {
-					// console.error(`Cannot parse xirysResponse  responseText: ${err}`);
-		// }
-		
-	}
-	
-	
-	
-	
-	
-	
-   
-    /*  if(platformType==1)
-																						fireBaseEntreyName4usage= "platformType1_"+serverOwner
-																					 else  if(platformType==2)
-																						fireBaseEntreyName4usage="aws_"+instanceId	
-																					else  if(platformType==4)
-																						fireBaseEntreyName4usage="azure_"+instanceId.compute.name
-																					 
-																					 console.logColor(logging.Blue, "fireBaseEntreyName4usage ->  "+ fireBaseEntreyName4usage);							
-																		*/
-
-    // console.logColor(logging.Blue, "takeElInfotakeElInfo: serverOwner ->  "+ serverOwner);
-
-    //doMatchmaker()
-    console.log(
-      "exeLuncher-->ss takeElInfo : instanceId_exeLuncher:-" +
-        instanceId_exeLuncher
-    );
-    //doMatchmaker(instanceId_exeLuncher)
-    //doPlatformSpecificTasks();
-  });
-
-  socket.on("handleAppCrashedInformedByEL", function (jsonObj) 
+socket.on("handleAppCrashedInformedByEL", function (jsonObj) 
 							{
 								  disconnectAllPlayers()
 							}
@@ -2179,73 +2213,256 @@ io.on("connection", function (socket)
 	OnPreAllocateCmd( jsonObj,socket ) 
     
   });
+  
+  
+   
+  socket.on("takeElInfo", function (jsonObj) 
+  {
+    console.logColor(
+      logging.Blue,
+      "takeElInfo jsonObj ->  " //+ JSON.stringify(jsonObj)
+    );
+    socket.elInfo = jsonObj;
+	var elInfo=jsonObj
+	console.log(players.size);
+	console.log(jsonObj.uid);
+	/* for (let player of players.values()) 
+	{
+		 console.log(player.uid);
+		 
+		if(player.uid == jsonObj.uid)
+		{
+			
+			player.el=socket
+			break
+		}
+	}
+	 */
+	
+	
+    ec2_region = jsonObj.ec2_region;
+    instanceId_exeLuncher = jsonObj.instanceId_exeLuncher;
+    instanceId = instanceId_exeLuncher;
+    //serverOwner=jsonObj.serverOwner
 
-  //????????????????????????????????????????????????????
-  socket.on("error", (error) => {
-    console.log("io_exeluncher reconnect_error : ", error);
-  });
+    //if(	jsonObj.hasOwnProperty("onDemandMachine"))
+    //{
+    isOnDemandMachine = jsonObj.isOnDemandMachine;
+    computerName = jsonObj.computerName;
+    userName = jsonObj.userName;
+    platformType = jsonObj.platformType;
+    ec2_region = jsonObj.ec2_region;
 
-  socket.on("connect", () => {
-    console.log("io_exeluncher connect 22222222222222222222do");
-  });
+    //}
+	
+	
+	
+	if(elInfo.preAllocateApps)
+	{
+		appName =elInfo.preAllocateApp_name
+		 console.log("yyyyyyyyy 2");
+		serverOwner =elInfo.preAllocateApp_owner
+		configuration =undefined
+		configurationName =elInfo.preAllocateApp_configurationName
+		version="-1"
+	}
 
-  socket.on("connect_timeout", (timeout) => {
-    console.log("io_exeluncher connect_timeout: " + timeout);
-  });
+    titleID = computerName;
+  
 
-  socket.on("connect_error", (error) => {
-    console.log("io_exeluncher connect_error: ", error);
-  });
+	if( ( platformType== 2)||( platformType== 3)|| ( platformType== 4))
+		titleID = instanceId_exeLuncher;
+ 
+    console.logColor(logging.Yellow, "platformType ->  " + platformType);
 
-  //Fired upon a successful reconnection.
-  socket.on("reconnect", (attemptNumber) => {
-    console.log("io_exeluncher reconnect attemptNumber: " + attemptNumber);
-  });
+    //setTitle("Free : " + httpsPort + " : " + streamerPort + " : " + titleID);
+    console.logColor(
+      logging.Blue,
+      " isOnDemandMachine ->  " + isOnDemandMachine
+    );
+	
+     epicTurnServerOnELMachine = {
+      iceServers: [
+        {
+          urls: [
+            "stun:" + jsonObj.serverPublicIp + ":19302",
+            "turn:" + jsonObj.serverPublicIp + ":19303",
+            //,"turn:"+serverPublicIp+":19303?transport=tcp"
+          ],
+          username: "PixelStreamingUser",
+          credential: "Another TURN in the road",
+        },
+      ],
+    };
 
-  socket.on("reconnect_attempt", (attemptNumber) => {
+   
     console.log(
-      "io_exeluncher reconnect_attempt attemptNumber: " + attemptNumber
+      "exeLuncher-->ss takeElInfo : instanceId_exeLuncher:-" +
+        instanceId_exeLuncher
+    );
+   
+  });
+
+
+
+    socket.on("disconnect", function (reason)
+    {
+       var i=0
+																 exelunchers.forEach(function(c){
+
+																	if(c.id == socket.id)
+																		exelunchers.splice(i,1)
+
+																	i++
+
+																}); 
+
+      console.log(
+        "exeluncher disconnected " +
+        util.inspect(socket.id) +
+        ", exelunchers.length: " +
+        exelunchers.length
+      );
+      console.log("io_exeluncher: disconnect reason: " + reason);
+    });
+
+    //????????????????????????????????????????????????????
+    socket.on("error", (error) =>
+    {
+      console.log("io_exeluncher reconnect_error : ", error);
+    });
+
+    socket.on("connect", () =>
+    {
+      console.log(
+        "---------------io_exeluncher connect 22222222222222222222do"
+      );
+    });
+
+    socket.on("connect_timeout", (timeout) =>
+    {
+      console.log("io_exeluncher connect_timeout: " + timeout);
+    });
+
+    socket.on("connect_error", (error) =>
+    {
+      console.log("io_exeluncher connect_error: ", error);
+    });
+
+    //Fired upon a successful reconnection.
+    socket.on("reconnect", (attemptNumber) =>
+    {
+      console.log("io_exeluncher reconnect attemptNumber: " + attemptNumber);
+    });
+
+    socket.on("reconnect_attempt", (attemptNumber) =>
+    {
+      console.log(
+        "io_exeluncher reconnect_attempt attemptNumber: " + attemptNumber
+      );
+    });
+
+    socket.on("reconnecting", (attemptNumber) =>
+    {
+      console.log("io_exeluncher reconnecting attemptNumber: " + attemptNumber);
+    });
+
+    socket.on("reconnect_error", (error) =>
+    {
+      console.log("io_exeluncher reconnect_error : ", error);
+    });
+
+    socket.on("reconnect_failed", () =>
+    {
+      console.log("io_exeluncher reconnect_failed  ");
+    });
+
+
+ socket.on('ping4MMLineker', () => {
+    console.log('Received ping4MMLineker from client');
+    socket.emit('pong4MMLineker');
+  });
+  
+    socket.on("ping", () =>
+    {
+      console.log("io_exeluncher ping ");
+    });
+
+    socket.on("pong", (latency) =>
+    {
+      console.log("io_exeluncher pong latency: ", latency);
+    });
+
+    socket.on("isCcuLimitExceeded", async (obj)=>{
+      const responseEvent = `isCcuLimitExceededResponse`;
+      if(obj && obj.owner && obj.owner.length){
+        const config = {
+          method: 'get',
+          url: `https://controlpanel.eagle3dstreaming.com/${obj.owner}/getUsersinfo`
+        }
+        try{
+          let response = await axios(config);
+          response = response.data;
+          const maxCcuLimit = response.maxUserLimit;
+          if(!maxCcuLimit || maxCcuLimit == undefined || maxCcuLimit <= 0){
+            return socket.emit(responseEvent, {error: `Failed to fetch maxUserLimit for user ${obj.owner}`, meta: {maxCcuLimit}});
+          }
+
+          let i = 0;
+          while(!cirrusServers_io.size && !cirrusServers.size && i<10){
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            i++;
+          }
+          //START
+          console.log(cirrusServers_io.size)
+          console.log(cirrusServers.size)
+
+          if (matchmakerType == 2) 
+		        cirrusServersT = cirrusServers_io;
+          else 
+		        cirrusServersT = cirrusServers;
+
+          console.logColor(logging.White, "isCcuLimitExceeded")
+          console.log(JSON.stringify(cirrusServersT.size));
+
+          let count = 0;
+          for (const cirrusServer223 of cirrusServersT.values()){
+            if (cirrusServer223.owner == obj.owner ||cirrusServer223.temp_OwnerOfLastAssignedPlayer == obj.owner || (cirrusServer223.elInfo && cirrusServer223.elInfo.preAllocateApp_owner == obj.owner))
+              count++;
+              console.log("count-->")
+              console.log(count)
+              console.log(JSON.stringify(cirrusServer223))
+          }
+    
+          if (count >= maxCcuLimit){
+            return socket.emit(responseEvent, {data: {status: true, count: {count, maxCcuLimit}}});
+          } else {
+            return socket.emit(responseEvent, {data: {status: false, count: {count, maxCcuLimit}}});
+	        }
+          //END
+        }catch(err){
+          return socket.emit(responseEvent, {error: `Critical error in fetching maxUserLimit for user ${obj.owner}`, meta: {object: err, string: err.toString(), stringified: JSON.stringify(err)}});
+        }
+        
+      }
+		//if(obj.el_version== config.el_version)
+			socket.emit("taskeMMlinkerInfo", MMLinkerInfo);
+		//else
+		//	socket.emit("secretKeyMismatched");
+    });
+
+    //????????????????????????????????????????????????????
+  });
+
+  http_exeluncher.listen(exeluncherPort, function ()
+  {
+    console.logColor(
+      logging.Red,
+      " listening on *:" + exeluncherPort + " for exeLuncher"
     );
   });
-
-  socket.on("reconnecting", (attemptNumber) => {
-    console.log("io_exeluncher reconnecting attemptNumber: " + attemptNumber);
-  });
-
-  socket.on("reconnect_error", (error) => {
-    console.log("io_exeluncher reconnect_error : ", error);
-  });
-
-  socket.on("reconnect_failed", () => {
-    console.log("io_exeluncher reconnect_failed  ");
-  });
-
-  socket.on("ping", () => {
-    console.log("io_exeluncher ping ");
-  });
-
-  socket.on("pong", (latency) => {
-    console.log("io_exeluncher pong latency: ", latency);
-  });
-
-  //????????????????????????????????????????????????????
-});
-
-
-function startServerListening(httpServer, port, logName) {
-  httpServer.on("error", function (e) {
-    // do your thing
-    console.log(logName + " error : " + e);
-    console.log(logName + " exiting the process  ");
-    exitSS("ssQuiting",e);
-  });
-
-  httpServer.listen(port, function () {
-    console.log(logName + " listening on *: " + port);
-
-  }); 
 }
 
 
+startio_exeluncher()
 
- startServerListening(http2, config.exeluncherPort, "exeluncher");
