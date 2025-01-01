@@ -260,11 +260,11 @@ function askTostartStreamingAppLunchingProcess(dataToSend,res) {
 	dataToSend.PublicIp=config.PublicIp
 	dataToSend.StreamerPort=config.StreamerPort
 	var url="https://"+config.MatchmakerAddress + ":"+config.MatchmakerPort+"/startStreamingAppLunchingProcess"
-	 console.log('askTostartStreamingAppLunchingProcess url:'+url); 
+	 /console.log('askTostartStreamingAppLunchingProcess url:'+url); 
 	 console.dir(dataToSend); 
   axios.post(url, dataToSend)
     .then(response => {
-      console.log('Data sent successfully:', response.data); 
+      //console.log('Data sent successfully:', response.data); 
 	  
 	  
 	  if(response.data.uid)
@@ -1079,7 +1079,7 @@ function forwardPlayerMessage(player, msg) {
 function onPlayerDisconnected(playerId) {
 	const player = players.get(playerId);
 	askToCleanQueueForThisPlayer(player) 
-	shutDownAppAndDoPostShutdownTasks(player.uid)
+	shutDownAppAndDoPostShutdownTasks(player)
 	player.unsubscribe();
 	players.delete(playerId);
 	--playerCount;
@@ -1525,20 +1525,20 @@ io.set('pingTimeout', 4000);
  */
 
 
-function shutDownAppAndDoPostShutdownTasks(uid)//isAppPreAllocateCmd=false) 
+function shutDownAppAndDoPostShutdownTasks(player)//isAppPreAllocateCmd=false) 
 {
 	   var data = {
-    uid: uid
+    uid: player.uid
    
   };
   console.log("shutDownAppAndDoPostShutdownTasks data: ");
   console.dir(data);
  
- if(exeluncher)
-	exeluncher.emit("shutDownAppAndDoPostShutdownTasks", data);
+ if(player.el)
+	player.el.emit("shutDownAppAndDoPostShutdownTasks", data);
 	else
 	{
-		postToTelegram("el dead but ue app running "+ JSON.stringify(data),-811123300)   // need to send ue exe command to quite
+		postToTelegram("player.el undefined may be  ue app running "+ JSON.stringify(data),-811123300)   // need to send ue exe command to quite
 	}
 }
 
@@ -1581,7 +1581,7 @@ io.on("connection", function (socket)
     socket.disconnect(0); //2do----------this will make the exeluncher to stop working. need to make that to try to MM
     return;
   } */
-  exeluncher = socket;
+  exeluncher = undefined;
   // console.log(socket);
 
   // console.info(`Client connected [id=${socket.id}]`);
@@ -1831,6 +1831,23 @@ io.on("connection", function (socket)
       "takeElInfo jsonObj ->  " //+ JSON.stringify(jsonObj)
     );
     elInfo = jsonObj;
+	
+	console.log(players.size);
+	console.log(jsonObj.uid);
+	for (let player of players.values()) 
+	{
+		 console.log(player.uid);
+		 
+		if(player.uid == jsonObj.uid)
+		{
+			
+			player.el=socket
+			break
+		}
+	}
+	
+	
+	
     ec2_region = jsonObj.ec2_region;
     instanceId_exeLuncher = jsonObj.instanceId_exeLuncher;
     instanceId = instanceId_exeLuncher;
