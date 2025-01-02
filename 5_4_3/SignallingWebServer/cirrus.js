@@ -2240,6 +2240,7 @@ socket.on("handleAppCrashedInformedByEL", function (jsonObj)
 	 */
 	
 	
+	return
     ec2_region = jsonObj.ec2_region;
     instanceId_exeLuncher = jsonObj.instanceId_exeLuncher;
     instanceId = instanceId_exeLuncher;
