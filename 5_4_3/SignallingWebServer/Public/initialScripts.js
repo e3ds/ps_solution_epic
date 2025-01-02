@@ -6,7 +6,7 @@ var ss_list = [
 			"latitude": 32.01,
 			"longitude": -102.11,
 		},
-		{
+		/* {
 			"ss_url": "asia1.eagle3dstreaming.com:4430",
 			"latitude": 35.652832,  
 			"longitude": 139.839478,
@@ -15,8 +15,12 @@ var ss_list = [
 			"ss_url": "frank.eagle3dstreaming.com:4430",
 			"latitude": 50.11,  
 			"longitude": 8.68,
-		},
+		}, */
 	];
+	
+	
+	
+	
 var hasVideoStreamStarted2 =false ;
 var skipReporting =0 ;
 function getCurrentDate() {
