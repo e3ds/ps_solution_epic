@@ -146,12 +146,19 @@ if(enableRESTAPI) {
 		}
 	});
 }
+
+const { v4: uuidv4 } = require('uuid');
+
 function generateUniqueId(prefix) {
   // Generate a random 8-character hexadecimal string
   const randomPart = Math.random().toString(16).substring(2, 10); 
 
+
+var fsfsg= `${prefix}-${uuidv4()}`;
+
+
   // Combine the prefix with the random part
-  return `${prefix}_${randomPart}`;
+  return fsfsg//`${prefix}_${randomPart}`;
 }
 
 
@@ -312,7 +319,8 @@ const axiosInst = axios.create({
 
 
 var waitingRequests=[]
-async function getDownloadLinkForUploader4ToUSeBeforeQueue(req_data,res111) 
+//async 
+function getDownloadLinkForUploader4ToUSeBeforeQueue(req_data,res111) 
 {
 console.log("---------getDownloadLinkForUploader4ToUSeBeforeQueue req_data: " + JSON.stringify(req_data));
 				var url=  
@@ -499,7 +507,7 @@ function assignReqToEl(el,req_data,j=undefined)
 							req_data.assignEL=util.inspect(el.id)
 	
 	if(j != undefined)
-	waitingRequests.splice(j, 1);
+		waitingRequests.splice(j, 1);
 }
 
 
