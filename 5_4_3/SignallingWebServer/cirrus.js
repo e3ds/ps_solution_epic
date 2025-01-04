@@ -404,13 +404,21 @@ function askTostartStreamingAppLunchingProcess(req_data, res111) {
                     var found = false;
                     for (var i = 0; i < exelunchers_mm.length; i++) {
                         if (isElAssignable(exelunchers_mm[i])) {
+							
+							console.log("---asiging el : "+exelunchers_mm[i].elInfo.computerName );
+							
                             assignReqToEl(exelunchers_mm[i], req_data);
                             found = true;
                             break;
                         }
                     }
 
-                    if (!found) waitingRequests.push(req_data);
+                    if (!found) 
+					{
+						console.log("---no free e.putting in weaiting rquest: "+req_data.uid );
+
+						waitingRequests.push(req_data);
+					}
 
                     if (req_data.uid) {
                         app.set("views", __dirname + "/views");
@@ -1268,7 +1276,7 @@ function forwardPlayerMessage(player, msg) {
 
 function onPlayerDisconnected(playerId) {
 	const player = players.get(playerId);
-	askToCleanQueueForThisPlayer(player) 
+	//askToCleanQueueForThisPlayer(player) 
 	shutDownAppAndDoPostShutdownTasks(player)
 	player.unsubscribe();
 	players.delete(playerId);
@@ -1314,8 +1322,8 @@ playerServer.on('connection', function (ws, req) {
 		var msg;
 		try {
 			msg = JSON.parse(msgRaw);
-			console.log("msg-->")
-			console.dir(msg)
+			//console.log("msg-->")
+			//console.dir(msg)
 		} catch (err) {
 			console.error(`Cannot parse player ${playerId} message: ${msgRaw}\nError: ${err}`);
 			ws.close(1008, 'Cannot parse');
@@ -1789,6 +1797,8 @@ var app_exeluncher = require("express")();
 var http_exeluncher = require("http").Server(app_exeluncher);
 var io_exeluncher = require("socket.io")(http_exeluncher);
 var util = require("util");
+
+
 function startio_exeluncher() {
   io_exeluncher.on("connection", function (socket)
   {
@@ -1807,7 +1817,7 @@ function startio_exeluncher() {
     );
 	socket.exeData=undefined
 
-
+	processWaitingRequests() 
 	
     //////////////////////////////upload
     
@@ -2652,6 +2662,7 @@ socket.on("handleAppCrashedInformedByEL", function (jsonObj)
     );
   });
 }
+
 
 
 startio_exeluncher()
