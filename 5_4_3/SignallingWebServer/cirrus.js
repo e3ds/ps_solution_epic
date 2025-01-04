@@ -255,10 +255,199 @@ res.render("observer", {
         MML_backDoorPort4_io: config.MML_backDoorPort4_io,
       });
 	   */
-function askTostartStreamingAppLunchingProcess(dataToSend,res) {
+
+
+function isElAssignable(el) 
+{
+	if(
+	(el.isAssigned != true)
+						&&
+						(
+							(el.exeData== undefined)
+							||
+							(el.exeData.length <=0) 
+						)
+	)
+		return true
+		else
+			return false 
+	
+}
+
+
+function assignReqToEl(el,req_data,j=undefined) 
+{
+	el.isAssigned=true
+							console.log("---------startStreamingAppLunchingProcess : " + JSON.stringify(req_data));
+							el.emit("startStreamingAppLunchingProcess", req_data);
+							   // Send a response (e.g., acknowledge receipt)
+							   
+							  
+							req_data.assignEL=util.inspect(el.id)
+	
+	if(j != undefined)
+		waitingRequests.splice(j, 1);
+}
+
+
+function processWaitingRequests() 
+{
+	
+	
+	if(waitingRequests.length>0)
+	{
+		for (j = 0; j < waitingRequests.length; j++) 
+		{
+			var req_data=waitingRequests[j]
+			for (i = 0; i < exelunchers.length; i++) 
+				{
+					//console.log(exelunchers.exeData );	
+					//console.log(exelunchers.exeData.length );	
+					if(isElAssignable(exelunchers[i]) )
+						{
+							assignReqToEl(exelunchers[i],req_data,j) 
+							  
+							//req_data.assignEL=util.inspect(exelunchers[i].id)
+						  break
+							
+						}
+					
+				}
+			
+					
+		}
+		
+	}
+	
+	
+}
+
+
+
+const { v4: uuidv4 } = require('uuid');
+
+function generateUniqueId(prefix) {
+  // Generate a random 8-character hexadecimal string
+  const randomPart = Math.random().toString(16).substring(2, 10); 
+
+
+var fsfsg= `${prefix}-${uuidv4()}`;
+
+
+  // Combine the prefix with the random part
+  return fsfsg//`${prefix}_${randomPart}`;
+}
+
+const axios = require('axios');
+
+const https233333 = require("https");
+const axiosInst = axios.create({
+  httpsAgent: new https233333.Agent({
+    rejectUnauthorized: false,
+  }),
+});
+
+var waitingRequests=[]
+//async 
+//function getDownloadLinkForUploader4ToUSeBeforeQueue(req_data,res111) 
+function askTostartStreamingAppLunchingProcess(req_data, res111) {
+    console.log("---------getDownloadLinkForUploader4ToUSeBeforeQueue req_data: " + JSON.stringify(req_data));
+
+    var url = "https://upload-api.eagle3dstreaming.com/api/v1/files/coreweave"
+        + "/streamingapp/"
+        + req_data.owner
+        + "/"
+        + req_data.appName
+        + "/download/";
+
+    if (req_data.version == -1 || req_data.version == undefined) {
+        url = url + "latest";
+    } else {
+        url = url + req_data.version;
+    }
+
+    console.log("---------url111 : " + url);
+
+    return new Promise((resolve) => {
+        axiosInst
+            .get(url)
+            .then(async (res) => {
+                console.logColor(logging.Red, "111--------------getAppListOfFromGCS: " + " . axiosInst data:" + JSON.stringify(res.data));
+
+                if (res.data.status == "error") {
+                    if (res.data.message == "Not Found") {
+                        var messageToSend = req_data.owner + "/" + req_data.appName + " does not exist";
+                        res111.status(200).json({ error: messageToSend });
+                    } else {
+                        res111.status(200).json({ error: res.data.message });
+                    }
+                    console.log(res.data.message);
+                    console.log(res.data.stack);
+                    return resolve(false);
+                } else {
+                    var url = res.data.data.url; // azure storage
+                    console.log("---------url2222 : " + url);
+
+                    var version222 = path.parse(res.data.data.filename).name;
+                    console.log("---------version222 : " + version222);
+
+                    req_data.appDownloadInfo = res.data.data;
+                    req_data.version = version222;
+                    req_data.ss_config = config;
+
+                    var uniqueId = generateUniqueId(req_data.owner + "_" + req_data.appName);
+                    console.log(uniqueId);
+
+                    req_data.uid = uniqueId;
+
+                    var exelunchers_mm = exelunchers;
+                    var found = false;
+                    for (var i = 0; i < exelunchers_mm.length; i++) {
+                        if (isElAssignable(exelunchers_mm[i])) {
+                            assignReqToEl(exelunchers_mm[i], req_data);
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) waitingRequests.push(req_data);
+
+                    if (req_data.uid) {
+                        app.set("views", __dirname + "/views");
+                        app.set("views", __dirname + "/Public");
+
+                        var ejsViewFile = 'player';
+                        var myStringValue = req_data.uid;
+
+                        res111.render(ejsViewFile, { myStringValue });
+                    }
+                }
+                return resolve(true);
+            })
+            .catch((error) => {
+                console.error('Trying again, because of Error sending data:', error);
+                askTostartStreamingAppLunchingProcess(req_data, res111);
+                return resolve(true);
+            });
+    });
+}
+
+
+
+
+
+function askTostartStreamingAppLunchingProcess11(dataToSend,res) {
 	dataToSend.ss_config=config 
 	dataToSend.PublicIp=config.PublicIp
 	dataToSend.StreamerPort=config.StreamerPort
+
+	
+	getDownloadLinkForUploader4ToUSeBeforeQueue(dataToSend,res)
+
+
+	
+	return
+	
 	var url="https://"+config.MatchmakerAddress + ":"+config.MatchmakerPort+"/startStreamingAppLunchingProcess"
 	 console.log('askTostartStreamingAppLunchingProcess url:'+url); 
 	 console.dir(dataToSend); 
@@ -1197,7 +1386,7 @@ function disconnectAllPlayers(streamerId) {
  */
 
 
-const axios = require('axios');
+
 
 async function getIPDetails(ipAddress) {
   try {
@@ -2467,3 +2656,148 @@ socket.on("handleAppCrashedInformedByEL", function (jsonObj)
 
 startio_exeluncher()
 
+
+
+
+
+/////////
+
+function sendExeluncherLunchAppCmd(ws)//isAppPreAllocateCmd=false) 
+{
+	console.trace()
+	if(ws)
+		sendIncludeInTimeRecordsOnlyToThisPlayer(ws,"sendExeluncherLunchAppCmdCalledAt",Date.now())
+		
+
+	console.logColor(logging.Red, "sendExeluncherLunchAppCmd()  "); 
+	
+	console.logColor(    logging.Red,    "yyyyy 5555 serverOwner :" + serverOwner ) ;
+ 
+ 
+	 console.log(" sendExeluncherLunchAppCmd()" );
+	   console.logColor(logging.Red, "444444 serverOwner = " + serverOwner);
+  if (streamer !== undefined) 
+  {
+	var msfsfsg=	"sendExeluncherLunchAppCmd() found streamer alreday connected "
+	msfsfsg=
+	msfsfsg
+	+" lastRequestToCloseExefor.appName: "
+	+lastRequestToCloseExefor.appName
+	+" lastRequestToCloseExefor.serverOwner: "
+	+lastRequestToCloseExefor.serverOwner
+	+ " requested: "+appName
+	
+	if(owner)
+		msfsfsg=msfsfsg+ " owner: "+owner
+	
+		//postToTelegram2(msfsfsg,-811123300)  
+   console.log("sendExeluncherLunchAppCmd to  exeluncher skipped as a streamer already connected.  ");
+    return;
+  }
+ 
+	  
+	  
+  
+  
+  if(version === undefined)
+	  version=-1
+  
+
+  if (appName === undefined 
+  || version === undefined
+  || configuration === undefined
+  
+  ) 
+  {
+	  
+	if(elInfo.preAllocateApps)
+	{
+		appName =elInfo.preAllocateApp_name
+		 console.log("yyyyyyyyy 3");
+		serverOwner =elInfo.preAllocateApp_owner
+		configurationName =elInfo.preAllocateApp_configurationName
+		
+		if ( //!isAppPreAllocateCmd  && 
+		(configuration === undefined) )
+		{
+			console.logColor(logging.Red, " !!!!!!!!!!!sendExeluncherLunchAppCmd(): configuration undefined.  ");
+			getConfigurationFromFB() 
+			return
+		} 
+	
+		configuration =configuration
+		version="-1"
+		
+
+	} 
+	else
+	{
+		console.log(
+		  "appName || version  || configuration  undefined .So skipping sendExeluncherLunchAppCmd"
+		);
+		 return;
+     }
+    }
+	
+	
+	  
+    console.logColor(logging.Red, "yyyyy 111 serverOwner = " + serverOwner);
+console.logColor(logging.Red, "appName = " + appName);
+console.logColor(logging.Red, "version = " + version);
+console.logColor(logging.Red, "configuration = " + configuration);
+	
+    if ( //!isAppPreAllocateCmd  && 
+	(configuration === undefined) )
+	{
+		console.logColor(logging.Red, " !!!!!!!!!!!sendExeluncherLunchAppCmd(): configuration undefined.  ");
+		
+		return
+	} 
+	
+
+  var data = {
+    appName: appName, //"DHP_Config_Desktop"
+    version: version, //"DHP_Config_Desktop"
+    SSAddress: serverPublicIp,
+    ue4StreamerToSS: streamerPort,
+    configuration: configuration,
+    owner: serverOwner,
+   
+    appDownloadInfo: appDownloadInfo,
+    uInfo: uInfo,
+  };
+
+	if(ws &&   ws.userDeviceInfo)
+		data.userDeviceInfo=ws.userDeviceInfo
+	else
+		data.userDeviceInfo=userDeviceInfo
+ 
+  //console.log(" exeluncher- lunchApp :" + JSON.stringify(data));
+	console.logColor(    logging.Red,   "configuration :" + JSON.stringify(configuration));
+	console.logColor(    logging.Red,    "exeluncher- lunchApp :" 
+	//+ JSON.stringify(data) 
+	) ;
+ 
+ 
+  if (exeluncher === undefined) 
+  {
+    sendMsgToAllConnectedPlayer(
+      " !!!!!!!!!!!exeluncher undefined for  " + JSON.stringify(data)
+    );
+  } 
+  else 
+  {
+	    console.logColor(    logging.Red,    "yyyyy2222 serverOwner :" + serverOwner ) ;
+	 console.logColor(    logging.Red," sendExeluncherLunchAppCmd() ss-> exeluncher lunchApp :" 
+	 //+ JSON.stringify(data)
+	 );
+	
+	 if(ws)
+		 sendIncludeInTimeRecordsOnlyToThisPlayer(ws,"lunchAppCmdSentToELAt",Date.now())
+	  exeluncher.emit("lunchApp", data);
+	  
+  }
+} 
+
+
+//////////
