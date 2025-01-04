@@ -259,6 +259,10 @@ res.render("observer", {
 
 function isElAssignable(el) 
 {
+	
+	if(el.elInfo== undefined)
+		return false 
+	
 	if(
 	(el.isAssigned != true)
 						&&
@@ -1731,6 +1735,9 @@ function shutDownAppAndDoPostShutdownTasks(player)//isAppPreAllocateCmd=false)
 				{
 					
 					console.log(exelunchers.length );
+					if(el.elInfo== undefined)
+						continue
+					
 					console.log(exelunchers[i].elInfo.uid );						
 					console.log(player.uid );						
 					if(exelunchers[i].elInfo.uid==player.uid ) 
